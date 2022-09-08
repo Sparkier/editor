@@ -13,6 +13,8 @@ import {dispatchingLogger} from '../../utils/logger';
 import {Popup} from '../popup';
 import './index.css';
 
+import preParse from './preParse';
+
 // Add additional projections
 addProjections(vega.projection);
 
@@ -134,6 +136,8 @@ class Editor extends React.PureComponent<Props, State> {
       // In vl mode, we compile Vega-Lite spec along with config to Vega spec
       runtime = vega.parse(vegaSpec);
     } else {
+      preParse(vegaSpec);
+      // const preParseSpec:vega.Spec = preParse(vegaSpec)
       runtime = vega.parse(vegaSpec, config as VgConfig);
     }
 
@@ -185,6 +189,7 @@ class Editor extends React.PureComponent<Props, State> {
       debug.vegaLiteSpec = debug.normalizedVegaLiteSpec = undefined;
     }
     setRuntime(runtime);
+    console.log(runtime);
     setView(view);
   }
 
@@ -201,7 +206,14 @@ class Editor extends React.PureComponent<Props, State> {
       processedContexts.add(context);
       for (const [id, operator] of Object.entries(context.nodes as Record<string, any>)) {
         if (operator.stamp === clock) {
-          values[id] = operator.value;
+          // values[id] = operator.value;
+          values[id] = {
+            value: operator.value,
+            length: operator.value ? operator.value.length : null,
+            time: df._profiler[clock][operator.id].time,
+          };
+          // console.log(operator.id)
+          // values[id] = {time:df._profiler[clock][operator.id].time}
         }
       }
       for (const subContext of (context.subcontext as undefined | any[]) ?? []) {

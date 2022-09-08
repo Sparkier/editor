@@ -20,7 +20,10 @@ export function sanitizeValue(v: unknown): SanitizedValue {
     // If we can't stringify, it probably has cyclical references, so we'll just skip it
     return {type: 'value', value: JSON.parse(JSON.stringify(v, replacer))};
   } catch (e) {
-    return {type: 'error', error: e.toString()};
+    // return {type: 'error', error: e.toString()};
+    // delete the "value" property
+    if (v['value']) delete v['value'];
+    return {type: 'value', value: JSON.parse(JSON.stringify(v, replacer))};
   }
 }
 

@@ -11,6 +11,8 @@ import {mapDispatchToProps, mapStateToProps} from '.';
 import {EDITOR_FOCUS, KEYCODES, Mode, SCHEMA, SIDEPANE} from '../../../constants';
 import './index.css';
 import {parse as parseJSONC} from 'jsonc-parser';
+import {TextDocument} from 'vscode-json-languageservice';
+import {getFoldingRanges} from './getRanges';
 
 type Props = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps> &
@@ -232,6 +234,9 @@ class Editor extends React.PureComponent<Props> {
           break;
       }
     }
+
+    const textDocument = TextDocument.create('', 'json', 1, spec);
+    console.log(getFoldingRanges(textDocument));
 
     switch (parsedMode) {
       case Mode.Vega:

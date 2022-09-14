@@ -173,6 +173,7 @@ class Editor extends React.PureComponent<Props, State> {
       hover,
       loader,
     });
+    view['mapping'] = runtime['trace'];
 
     view.runAfter(this.runAfter, true);
     (view as any).logger(dispatchingLogger);
@@ -195,6 +196,8 @@ class Editor extends React.PureComponent<Props, State> {
 
   private runAfter(df: any) {
     const clock = df._clock;
+    console.log(df.mapping);
+    const perf_summary: Record<string, unknown> = {};
 
     // Mapping from ID to value
     const values: Record<string, unknown> = {};
@@ -222,6 +225,13 @@ class Editor extends React.PureComponent<Props, State> {
         }
       }
     }
+
+    for (const [key, id_list] of Object.entries(df.mapping as Record<string, any>)) {
+      perf_summary[key] = 0;
+      id_list.forEach((i) => (perf_summary[key] += values[String(i)] ? values[String(i)]['time'] : 0));
+    }
+    console.log(perf_summary);
+
     this.props.recordPulse(clock, values);
 
     // Set it up to run again

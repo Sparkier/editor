@@ -20,6 +20,7 @@ type Props = ReturnType<typeof mapStateToProps> &
 
 class Editor extends React.PureComponent<Props> {
   public editor: Monaco.editor.IStandaloneCodeEditor;
+  public hover: Monaco.IDisposable;
   constructor(props: Props) {
     super(props);
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -107,6 +108,17 @@ class Editor extends React.PureComponent<Props> {
       editor.deltaDecorations(this.props.decorations, []);
       this.props.setEditorFocus(EDITOR_FOCUS.SpecEditor);
     });
+
+    monaco.editor.defineTheme('my-theme', {
+      base: 'vs',
+      colors: {
+        'editor.hoverHighlightBackground': '#00ff00',
+      },
+      rules: [],
+      inherit: true,
+    });
+
+    monaco.editor.setTheme('my-theme');
 
     editor.addAction({
       contextMenuGroupId: 'vega',
@@ -198,6 +210,32 @@ class Editor extends React.PureComponent<Props> {
     if (prevProps.view !== this.props.view) {
       prevProps.compiledEditorRef && prevProps.compiledEditorRef.deltaDecorations(prevProps.decorations, []);
       prevProps.editorRef && prevProps.editorRef.deltaDecorations(prevProps.decorations, []);
+
+      if (this.hover) this.hover.dispose();
+      const textDocument = TextDocument.create('', 'json', 1, this.props.value);
+      console.log(getFoldingRanges(textDocument));
+      const hoverRanges = getFoldingRanges(textDocument);
+      const startLine_to_range = {};
+      hoverRanges.map((x) => (startLine_to_range[x.startLine] = x));
+      console.log(startLine_to_range);
+
+      this.hover = Monaco.languages.registerHoverProvider('json', {
+        provideHover(model, position) {
+          console.log(position);
+          if (position.lineNumber - 1 in startLine_to_range) {
+            const selected = startLine_to_range[position.lineNumber - 1];
+            return {
+              range: new Monaco.Range(
+                selected.startLine,
+                model.getLineMaxColumn(selected.startLine),
+                selected.endLine + 1,
+                model.getLineMaxColumn(selected.endLine + 1)
+              ),
+              contents: [{value: '**JSON Property Path**'}, {value: selected.path.join(' ')}],
+            };
+          }
+        },
+      });
     }
 
     if (this.props.parse) {
@@ -234,9 +272,6 @@ class Editor extends React.PureComponent<Props> {
           break;
       }
     }
-
-    const textDocument = TextDocument.create('', 'json', 1, spec);
-    console.log(getFoldingRanges(textDocument));
 
     switch (parsedMode) {
       case Mode.Vega:

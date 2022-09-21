@@ -46,6 +46,7 @@ export const SET_DECORATION = 'SET_DECORATION' as const;
 export const SET_COMPILED_EDITOR_REFERENCE = 'SET_COMPILED_EDITOR_REFERENCE' as const;
 export const SET_EDITOR_FOCUS = 'SET_EDITOR_FOCUS' as const;
 export const SET_BACKGROUND_COLOR = 'SET_BACKGROUND_COLOR' as const;
+export const SET_RANGES = 'SET_RANGES' as const;
 
 export const ERROR = 'ERROR' as const;
 export const WARN = 'WARN' as const;
@@ -100,7 +101,17 @@ export type Action =
   | AddError
   | AddWarning
   | AddInfo
-  | AddDebug;
+  | AddDebug
+  | SetRanges;
+
+export type SetRanges = ReturnType<typeof setRanges>;
+
+export function setRanges(ranges) {
+  return {
+    ranges,
+    type: SET_RANGES,
+  };
+}
 
 export function setMode(mode: Mode) {
   return {

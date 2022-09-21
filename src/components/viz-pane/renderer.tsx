@@ -14,6 +14,7 @@ import {version as VL_VERSION} from 'vega-lite';
 import {version as TOOLTIP_VERSION} from 'vega-tooltip';
 import {COMMIT_HASH} from '../header/help-modal';
 import {DataflowViewer} from '../../features/dataflow/DataflowViewer';
+import {PerfViewer} from '../../features/performance/PerfViewer';
 
 const defaultState = {
   header: '',
@@ -99,6 +100,8 @@ export default class VizPane extends React.PureComponent<Props, State> {
           return <SignalViewer onClickHandler={(header) => this.onClickHandler(header)} />;
         case NAVBAR.DataflowViewer:
           return <DataflowViewer />;
+        case NAVBAR.PerfViewer:
+          return <PerfViewer />;
         default:
           return null;
       }

@@ -42,7 +42,7 @@ function Type({type, label, selected}: {type: GraphType; label: string; selected
   );
 }
 
-function Pulses() {
+export function Pulses() {
   return (
     <fieldset>
       <legend>Filter by pulse</legend>

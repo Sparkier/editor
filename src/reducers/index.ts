@@ -55,6 +55,7 @@ import {
   UPDATE_VEGA_LITE_SPEC,
   UPDATE_VEGA_SPEC,
   WARN,
+  SET_RANGES,
 } from '../actions/editor';
 import {DEFAULT_STATE, GistPrivacy, Mode} from '../constants';
 import {State} from '../constants/default-state';
@@ -333,6 +334,11 @@ export default (state: State = DEFAULT_STATE, action: Action): State => {
       return {
         ...state,
         mode: action.mode,
+      };
+    case SET_RANGES:
+      return {
+        ...state,
+        ranges: action.ranges,
       };
     case SET_SCROLL_POSITION:
       return {

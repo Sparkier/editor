@@ -6,6 +6,7 @@ import {style} from './utils/cytoscapeStyle';
 import {Positions} from './utils/ELKToPositions';
 import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
+import {Highlight} from './highlightSlice';
 
 cytoscape.use(popper);
 
@@ -27,6 +28,7 @@ export function CytoscapeControlled({
   selected,
   onHover,
   onSelect,
+  highlight,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -34,7 +36,9 @@ export function CytoscapeControlled({
   selected: Elements | null;
   onSelect: (elements: Elements | null) => void;
   onHover: (target: null | {type: 'node' | 'edge'; id: string; referenceClientRect: DOMRect}) => void;
+  highlight: Highlight | null;
 }) {
+  console.log(highlight, 'highlight');
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
   const layoutRef = React.useRef<cytoscape.Layouts | null>(null);
@@ -64,6 +68,7 @@ export function CytoscapeControlled({
     cy.on('click', ({target}) => {
       if (target === cy) {
         onSelect(null);
+        cy.nodes('node').removeClass('highlightNodes');
       }
     });
     cy.on('mouseover', ({target}) => {
@@ -82,6 +87,10 @@ export function CytoscapeControlled({
         return;
       }
       onHover(null);
+    });
+    cy.on('dblclick', (event) => {
+      event.preventDefault();
+      cy.elements(`node[id = "${event.target.id()}"]`).classes('highlightNodes');
     });
     return () => {
       cy.destroy();
@@ -178,6 +187,16 @@ export function CytoscapeControlled({
       selectedElements.absoluteComplement().unselect();
     });
   }, [cyRef.current, selected]);
+
+  // set highlight to chosen nodes
+  React.useEffect(() => {
+    const cy = cyRef.current;
+    cy.nodes('node').removeClass('highlightNodes');
+
+    highlight.ids.forEach((id) => {
+      cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
+    });
+  }, [cyRef.current, highlight]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

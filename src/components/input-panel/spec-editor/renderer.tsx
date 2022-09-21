@@ -11,7 +11,7 @@ import {mapDispatchToProps, mapStateToProps} from '.';
 import {EDITOR_FOCUS, KEYCODES, Mode, SCHEMA, SIDEPANE} from '../../../constants';
 import './index.css';
 import {parse as parseJSONC} from 'jsonc-parser';
-import {TextDocument} from 'vscode-json-languageservice';
+import {TextDocument, FoldingRange} from 'vscode-json-languageservice';
 import {getFoldingRanges} from './getRanges';
 
 type Props = ReturnType<typeof mapStateToProps> &
@@ -28,6 +28,7 @@ class Editor extends React.PureComponent<Props> {
     this.editorWillMount = this.editorWillMount.bind(this);
     this.editorDidMount = this.editorDidMount.bind(this);
     this.onSelectNewVegaLite = this.onSelectNewVegaLite.bind(this);
+    this.mouseDownHandler = this.mouseDownHandler.bind(this);
   }
 
   public handleKeydown(e) {
@@ -43,7 +44,31 @@ class Editor extends React.PureComponent<Props> {
       }
     }
   }
+  public mouseDownHandler(event) {
+    const line = event.target.position.lineNumber - 1;
+    if (line in this.props.ranges) {
+      const path = this.props.ranges[line].path;
+      const path_str = path
+        .map((x) => {
+          if (typeof x === 'string') return `["${x}"]`;
+          return `[${x}]`;
+        })
+        .join('');
+      console.log(this.props.view, 'binidng');
 
+      const mapping = this.props.view['mapping'];
+      if (path_str in mapping) {
+        this.props.setHighlight({path: path_str, ids: mapping[path_str]});
+      } else {
+        const to_highlight = [];
+        for (const key in mapping) {
+          if (key.includes(path_str)) to_highlight.push(...mapping[key]);
+        }
+
+        this.props.setHighlight({path: path_str, ids: to_highlight});
+      }
+    }
+  }
   public handleMergeConfig() {
     const confirmation = confirm('The spec will be formatted on merge.');
     if (!confirmation) {
@@ -119,6 +144,8 @@ class Editor extends React.PureComponent<Props> {
     });
 
     monaco.editor.setTheme('my-theme');
+
+    editor.onMouseDown(this.mouseDownHandler);
 
     editor.addAction({
       contextMenuGroupId: 'vega',
@@ -218,12 +245,21 @@ class Editor extends React.PureComponent<Props> {
       const startLine_to_range = {};
       hoverRanges.map((x) => (startLine_to_range[x.startLine] = x));
       console.log(startLine_to_range);
+      this.props.setRanges(startLine_to_range);
+      console.log(this.props.ranges, 'ranges??');
+      console.log(this.props.view, 'view??');
 
       this.hover = Monaco.languages.registerHoverProvider('json', {
         provideHover(model, position) {
           console.log(position);
           if (position.lineNumber - 1 in startLine_to_range) {
             const selected = startLine_to_range[position.lineNumber - 1];
+            const path_str = selected.path.map((x) => {
+              if (typeof x === 'string') {
+                return `['${x}']`;
+              }
+              return `[${x}]`;
+            });
             return {
               range: new Monaco.Range(
                 selected.startLine,
@@ -231,7 +267,7 @@ class Editor extends React.PureComponent<Props> {
                 selected.endLine + 1,
                 model.getLineMaxColumn(selected.endLine + 1)
               ),
-              contents: [{value: '**JSON Property Path**'}, {value: selected.path.join(' ')}],
+              contents: [{value: '**JSON Property Path**'}, {value: path_str.join('')}],
             };
           }
         },

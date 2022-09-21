@@ -46,6 +46,14 @@ export const style: cytoscape.Stylesheet[] = [
     } as any,
   },
   {
+    selector: '.highlightNodes',
+    style: {
+      'overlay-color': 'blue',
+      'overlay-opacity': 0.7,
+      shape: 'triangle',
+    },
+  },
+  {
     selector: ':parent',
     style: {
       'text-valign': 'top',

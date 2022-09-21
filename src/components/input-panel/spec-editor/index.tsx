@@ -3,6 +3,7 @@ import {bindActionCreators, Dispatch} from 'redux';
 import * as EditorActions from '../../../actions/editor';
 import {State} from '../../../constants/default-state';
 import Renderer from './renderer';
+import {setHighlight} from '../../../features/dataflow/highlightSlice';
 
 export function mapStateToProps(state: State) {
   return {
@@ -23,6 +24,7 @@ export function mapStateToProps(state: State) {
     themeName: state.themeName,
     value: state.editorString,
     view: state.view,
+    ranges: state.ranges,
   };
 }
 
@@ -41,6 +43,8 @@ export function mapDispatchToProps(dispatch: Dispatch<EditorActions.Action>) {
       updateEditorString: EditorActions.updateEditorString,
       updateVegaLiteSpec: EditorActions.updateVegaLiteSpec,
       updateVegaSpec: EditorActions.updateVegaSpec,
+      setHighlight: setHighlight,
+      setRanges: EditorActions.setRanges,
     },
     dispatch
   );

@@ -48,6 +48,7 @@ export const NAVBAR = {
   Logs: 'Logs',
   SignalViewer: 'SignalViewer',
   DataflowViewer: 'DataflowViewer',
+  PerfViewer: 'PerfViewer',
 } as const;
 
 export const SIDEPANE = {

@@ -85,6 +85,20 @@ class DebugPaneHeader extends React.PureComponent<Props> {
               Dataflow Viewer
             </li>
           )}
+          {error === null && (
+            <li
+              className={navItem === NAVBAR.PerfViewer ? 'active-tab' : undefined}
+              onClick={(e) => {
+                if (debugPane) {
+                  e.stopPropagation();
+                }
+                showLogs(false);
+                toggleNavbar(NAVBAR.PerfViewer);
+              }}
+            >
+              Performance Viewer
+            </li>
+          )}
         </ul>
         {debugPane ? <ChevronDown /> : <ChevronUp />}
       </div>

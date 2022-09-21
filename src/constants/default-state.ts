@@ -62,6 +62,7 @@ export type State = {
   debugs: string[];
   themeName: string;
   backgroundColor: string;
+  ranges: any;
 } & typeof dataflowInitialState;
 
 export const DEFAULT_STATE: State = {
@@ -111,4 +112,5 @@ export const DEFAULT_STATE: State = {
   infos: [],
   backgroundColor: '#ffffff',
   ...dataflowInitialState,
+  ranges: {},
 };

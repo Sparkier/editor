@@ -197,7 +197,7 @@ class Editor extends React.PureComponent<Props, State> {
   private runAfter(df: any) {
     const clock = df._clock;
     console.log(df.mapping);
-    const perf_summary: Record<string, unknown> = {};
+    const perf_summary: Record<string, number> = {};
 
     // Mapping from ID to value
     const values: Record<string, unknown> = {};
@@ -225,14 +225,21 @@ class Editor extends React.PureComponent<Props, State> {
         }
       }
     }
+    // values['all_evaluate'] = df._profiler[clock]['all_evaluate'];
+    // if ('render' in df._profiler[clock]) values['render'] = df._profiler[clock]['render'];
+
+    let runtime = 0;
 
     for (const [key, id_list] of Object.entries(df.mapping as Record<string, any>)) {
       perf_summary[key] = 0;
-      id_list.forEach((i) => (perf_summary[key] += values[String(i)] ? values[String(i)]['time'] : 0));
+      id_list.forEach((i) => {
+        perf_summary[key] += values[String(i)] ? values[String(i)]['time'] : 0;
+      });
     }
+    runtime = Object.values<number>(perf_summary).reduce((acc: number, val: number) => acc + val, 0);
     console.log(perf_summary);
 
-    this.props.recordPulse(clock, values);
+    this.props.recordPulse(clock, values, Math.round((runtime + Number.EPSILON) * 100) / 100);
 
     // Set it up to run again
     df.runAfter(this.runAfter, true, 10);
@@ -257,7 +264,9 @@ class Editor extends React.PureComponent<Props, State> {
 
     view.renderer(renderer).initialize(chart);
 
+    const start = performance.now();
     await view.runAsync();
+    console.log(performance.now() - start, 'total runtime');
 
     if (tooltipEnable) {
       // Tooltip needs to be added after initializing the view with `chart`

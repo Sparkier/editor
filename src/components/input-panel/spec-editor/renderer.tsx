@@ -11,7 +11,7 @@ import {mapDispatchToProps, mapStateToProps} from '.';
 import {EDITOR_FOCUS, KEYCODES, Mode, SCHEMA, SIDEPANE} from '../../../constants';
 import './index.css';
 import {parse as parseJSONC} from 'jsonc-parser';
-import {TextDocument, FoldingRange} from 'vscode-json-languageservice';
+import {TextDocument} from 'vscode-json-languageservice';
 import {getFoldingRanges} from './getRanges';
 
 type Props = ReturnType<typeof mapStateToProps> &
@@ -29,6 +29,7 @@ class Editor extends React.PureComponent<Props> {
     this.editorDidMount = this.editorDidMount.bind(this);
     this.onSelectNewVegaLite = this.onSelectNewVegaLite.bind(this);
     this.mouseDownHandler = this.mouseDownHandler.bind(this);
+    this.hoverHandler = this.hoverHandler.bind(this);
   }
 
   public handleKeydown(e) {
@@ -57,18 +58,40 @@ class Editor extends React.PureComponent<Props> {
       console.log(this.props.view, 'binidng');
 
       const mapping = this.props.view['mapping'];
-      if (path_str in mapping) {
-        this.props.setHighlight({path: path_str, ids: mapping[path_str]});
-      } else {
-        const to_highlight = [];
-        for (const key in mapping) {
-          if (key.includes(path_str)) to_highlight.push(...mapping[key]);
-        }
 
-        this.props.setHighlight({path: path_str, ids: to_highlight});
+      const to_highlight = [];
+      for (const key in mapping) {
+        if (key.includes(path_str)) to_highlight.push(...mapping[key]);
       }
+
+      this.props.setHighlight({path: path_str, ids: to_highlight});
     }
   }
+
+  public hoverHandler(lineNumber) {
+    if (!lineNumber) this.props.setHighlight(null);
+    const line = lineNumber - 1;
+    if (line in this.props.ranges) {
+      const path = this.props.ranges[line].path;
+      const path_str = path
+        .map((x) => {
+          if (typeof x === 'string') return `["${x}"]`;
+          return `[${x}]`;
+        })
+        .join('');
+      console.log(this.props.view, 'binidng');
+
+      const mapping = this.props.view['mapping'];
+
+      const to_highlight = [];
+      for (const key in mapping) {
+        if (key.includes(path_str)) to_highlight.push(...mapping[key]);
+      }
+
+      this.props.setHighlight({path: path_str, ids: to_highlight});
+    }
+  }
+
   public handleMergeConfig() {
     const confirmation = confirm('The spec will be formatted on merge.');
     if (!confirmation) {
@@ -248,6 +271,7 @@ class Editor extends React.PureComponent<Props> {
       this.props.setRanges(startLine_to_range);
       console.log(this.props.ranges, 'ranges??');
       console.log(this.props.view, 'view??');
+      const setHover = this.hoverHandler;
 
       this.hover = Monaco.languages.registerHoverProvider('json', {
         provideHover(model, position) {
@@ -260,6 +284,7 @@ class Editor extends React.PureComponent<Props> {
               }
               return `[${x}]`;
             });
+            setHover(position.lineNumber);
             return {
               range: new Monaco.Range(
                 selected.startLine,
@@ -269,6 +294,8 @@ class Editor extends React.PureComponent<Props> {
               ),
               contents: [{value: '**JSON Property Path**'}, {value: path_str.join('')}],
             };
+          } else {
+            setHover(null);
           }
         },
       });

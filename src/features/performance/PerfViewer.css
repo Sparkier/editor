@@ -7,3 +7,12 @@
   padding-top: 0;
   background: var(--light-gray-color);
 }
+
+.perf-chart {
+  overflow: auto;
+  width: 100%;
+  display: flex;
+  padding: 5px;
+  padding-top: 0;
+  background: var(--light-gray-color);
+}

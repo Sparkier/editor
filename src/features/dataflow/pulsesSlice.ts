@@ -4,19 +4,23 @@ import {createSliceSelector} from './utils/createSliceSelector';
 import {SanitizedValue, sanitizeValue} from './utils/sanitizeValue';
 
 export type Values = Record<string, SanitizedValue>;
-export type Pulse = {clock: number; values: Values; nValues: number};
+export type Pulse = {clock: number; values: Values; nValues: number; runtime: number};
 export type PulsesState = Pulse[];
 const initialState: PulsesState = [];
 
 // Trim stored pulses to this maximum. If new pulses are recorded past this, drop them
 const MAX_PULSES = 100;
 
-export const recordPulse = createAction('recordPulse', (clock: number, values: Record<string, unknown>) => ({
-  payload: {
-    clock,
-    values: Object.fromEntries(Object.entries(values).map(([k, v]) => [k, sanitizeValue(v)])),
-  },
-}));
+export const recordPulse = createAction(
+  'recordPulse',
+  (clock: number, values: Record<string, unknown>, runtime: number) => ({
+    payload: {
+      clock,
+      values: Object.fromEntries(Object.entries(values).map(([k, v]) => [k, sanitizeValue(v)])),
+      runtime,
+    },
+  })
+);
 
 export const resetPulses = createAction<void>('resetPulses');
 

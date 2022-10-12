@@ -7,6 +7,7 @@ import {Positions} from './utils/ELKToPositions';
 import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
+import {Hover} from './hoverSlice';
 
 cytoscape.use(popper);
 
@@ -29,6 +30,7 @@ export function CytoscapeControlled({
   onHover,
   onSelect,
   highlight,
+  hoverByFlame,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -37,6 +39,7 @@ export function CytoscapeControlled({
   onSelect: (elements: Elements | null) => void;
   onHover: (target: null | {type: 'node' | 'edge'; id: string; referenceClientRect: DOMRect}) => void;
   highlight: Highlight | null;
+  hoverByFlame: Hover | null;
 }) {
   console.log(highlight, 'highlight');
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -193,10 +196,23 @@ export function CytoscapeControlled({
     const cy = cyRef.current;
     cy.nodes('node').removeClass('highlightNodes');
 
-    highlight.ids.forEach((id) => {
-      cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
-    });
+    if (highlight) {
+      highlight.ids.forEach((id) => {
+        cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
+      });
+    }
   }, [cyRef.current, highlight]);
+
+  React.useEffect(() => {
+    const cy = cyRef.current;
+    cy.nodes('node').removeClass('highlightNodes');
+
+    if (hoverByFlame) {
+      hoverByFlame.ids.forEach((id) => {
+        cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
+      });
+    }
+  }, [cyRef.current, hoverByFlame]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

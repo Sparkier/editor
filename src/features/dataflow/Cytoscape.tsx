@@ -7,6 +7,7 @@ import {setPopup} from './popupSlice';
 import {CytoscapeControlled} from './CytoscapeControlled';
 import {cytoscapeElementsSelector} from './runtimeSlice';
 import {selectionSelector, selectedHighlightSelector} from './highlightSlice';
+import {hoverSelector} from './hoverSlice';
 
 export function Cytoscape() {
   const dispatch = useDispatch();
@@ -18,6 +19,7 @@ export function Cytoscape() {
 
   const onSelect = React.useCallback((el) => dispatch(setSelectedElements(el)), [dispatch]);
   const onHover = React.useCallback((target) => dispatch(setPopup(target)), [dispatch]);
+  const hover = useAppSelector(hoverSelector);
 
   return (
     <CytoscapeControlled
@@ -27,6 +29,7 @@ export function Cytoscape() {
       onSelect={onSelect}
       onHover={onHover}
       highlight={highlight}
+      hoverByFlame={hover}
     />
   );
 }

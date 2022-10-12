@@ -4,8 +4,14 @@ import {currentLayoutSelector, useRecomputeLayout} from './layoutSlice';
 import {Cytoscape} from './Cytoscape';
 import {Popup} from './Popup';
 import './Graph.css';
-import {useDispatch} from 'react-redux';
-import {elementsSelectedSelector, setSelectedElements} from './selectionSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {elementsSelectedSelector, selectedPulseSelector, setSelectedElements} from './selectionSlice';
+// import { State } from '../../constants/default-state';
+// import { createSelector } from '@reduxjs/toolkit';
+// import { pulsesSelector } from './pulsesSlice';
+// import * as vega from 'vega';
+// import vegaTooltip from 'vega-tooltip';
+// import { Spec } from 'vega';
 
 export function Graph() {
   // Trigger starting the async layout computation, when this node is rendered

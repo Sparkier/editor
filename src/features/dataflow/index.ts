@@ -7,12 +7,21 @@ import {selectionSlice} from './selectionSlice';
 import {layoutSlice} from './layoutSlice';
 import {popupSlice} from './popupSlice';
 import {highlightSlice} from './highlightSlice';
+import {hoverSlice} from './hoverSlice';
 
 // Since we are using a number of pulses defined here with the rest of the global redux state
 // we need a few custom functions to combine these reducers and state types, to integrate
 // them into the rest of the redux state.
 
-const slices = [pulsesSlice, runtimeSlice, selectionSlice, layoutSlice, popupSlice, highlightSlice] as const;
+const slices = [
+  pulsesSlice,
+  runtimeSlice,
+  selectionSlice,
+  layoutSlice,
+  popupSlice,
+  highlightSlice,
+  hoverSlice,
+] as const;
 type SliceType = typeof slices[number];
 /**
  * Combines the slicers reducers manually, to account for leaving the rest

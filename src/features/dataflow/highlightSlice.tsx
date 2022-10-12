@@ -2,8 +2,9 @@ import {createAction, createSelector, createSlice} from '@reduxjs/toolkit';
 import {createSliceSelector} from './utils/createSliceSelector';
 
 export type Highlight = {path: string; ids: string[]};
-export type HighlightState = Highlight;
-const initialState: HighlightState = {path: null, ids: []};
+export type HighlightState = Highlight | null;
+// const initialState: HighlightState = {path: null, ids: []};
+const initialState: HighlightState = null;
 
 export const setHighlight = createAction<Highlight>('setHighlight');
 

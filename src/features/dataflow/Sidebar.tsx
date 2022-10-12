@@ -55,7 +55,8 @@ export function Pulses() {
         <thead>
           <tr>
             <th>Clock</th>
-            <th>Touched Nodes</th>
+            <th>Touched</th>
+            <th>Time(ms)</th>
           </tr>
         </thead>
         <PulsesRows />
@@ -82,11 +83,12 @@ function PulsesButtons() {
 
 function PulsesRows() {
   const pulses = useAppSelector(sortedPulsesSelector);
+  console.log(pulses, 'side');
   const selectedPulse = useAppSelector(selectedPulseSelector);
   return (
     <tbody>
-      {pulses.map(({clock, nValues}) => (
-        <MemoPulse key={clock} clock={clock} nValues={nValues} isSelected={clock === selectedPulse} />
+      {pulses.map(({clock, nValues, runtime}) => (
+        <MemoPulse key={clock} clock={clock} nValues={nValues} runtime={runtime} isSelected={clock === selectedPulse} />
       ))}
     </tbody>
   );
@@ -94,13 +96,24 @@ function PulsesRows() {
 
 const MemoPulse = React.memo(Pulse);
 
-function Pulse({clock, isSelected, nValues}: {isSelected: boolean; clock: number; nValues: number}) {
+function Pulse({
+  clock,
+  isSelected,
+  nValues,
+  runtime,
+}: {
+  isSelected: boolean;
+  clock: number;
+  nValues: number;
+  runtime: number;
+}) {
   const dispatch = useDispatch();
 
   return (
     <tr className={isSelected ? 'active-pulse' : ''} onClick={() => dispatch(setSelectedPulse(clock))}>
       <td>{clock}</td>
       <td>{nValues}</td>
+      <td>{runtime}</td>
     </tr>
   );
 }

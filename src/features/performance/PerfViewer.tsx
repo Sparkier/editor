@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Pulses} from '../dataflow/Sidebar';
 import './PerfViewer.css';
-import FlameChart from './FlameChart';
+import {Flame} from './FlameChart';
 import {PerfChart} from './PerfChart';
 import {useRecomputeLayout} from '../dataflow/layoutSlice';
 import {Cytoscape} from '../dataflow/Cytoscape';
@@ -36,7 +36,8 @@ export class PerfViewer extends React.Component<
           <Pulses />
         </div>
         <div className="perf-chart">
-          <PerfChart />
+          {/* <PerfChart /> */}
+          <Flame />
           <Graph />
         </div>
       </div>

@@ -6,8 +6,3 @@
   padding-top: 0;
   background: var(--light-gray-color);
 }
-
-.perf-chart {
-  display: flex;
-  flex-direction: column;
-}

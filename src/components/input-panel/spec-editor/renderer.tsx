@@ -79,7 +79,7 @@ class Editor extends React.PureComponent<Props> {
           return `[${x}]`;
         })
         .join('');
-      console.log(this.props.view, 'binidng');
+      console.log(this.props.view, 'binding');
 
       const mapping = this.props.view['mapping'];
 

@@ -109,7 +109,7 @@ export function CreateFlameChart({
           {type: 'stratify', key: 'id', parentKey: 'parent'},
           {
             type: 'partition',
-            field: 'time',
+            field: 'value',
             sort: {field: 'id'},
             size: [{signal: 'width'}, {signal: 'height'}],
           },
@@ -154,7 +154,8 @@ export function CreateFlameChart({
             fill: {scale: 'color', field: 'parent'},
             stroke: {value: '#fff'},
             tooltip: {
-              signal: "'op: ' + datum.id + (datum.time ? ', time: ' + datum.time + ' ms' : '')",
+              // signal: "'op: ' + datum.id + (datum.time ? ', time: ' + datum.time + ' ms' : '')",
+              signal: "'op: ' + datum.id + ', time: ' + datum.time + ' ms'",
             },
           },
           update: {
@@ -278,10 +279,21 @@ export function CreateFlameChart({
 
           for (const op of mapping[path_str]) {
             if (selected) {
-              if (selected[op]) flameInput.push({id: op, parent: path_str, time: selected[op]['value'].time});
+              if (selected[op])
+                flameInput.push({
+                  id: op,
+                  parent: path_str,
+                  time: selected[op]['value'].time,
+                  value: selected[op]['value'].time + 0.01,
+                });
             } else {
               if (pulse_1.values[op])
-                flameInput.push({id: op, parent: path_str, time: pulse_1.values[op]['value'].time});
+                flameInput.push({
+                  id: op,
+                  parent: path_str,
+                  time: pulse_1.values[op]['value'].time,
+                  value: pulse_1.values[op]['value'].time + 0.01,
+                });
             }
           }
         }
@@ -290,6 +302,7 @@ export function CreateFlameChart({
       chartRef.current.data('tree', flameInput);
 
       await chartRef.current.runAsync();
+      console.log(chartRef.current);
     }
     renderChart().catch(console.error);
   }, [mapping, selected, pulse_1]);

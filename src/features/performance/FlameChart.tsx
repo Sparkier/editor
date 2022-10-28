@@ -10,7 +10,7 @@ import {createSelector} from '@reduxjs/toolkit';
 import vegaTooltip from 'vega-tooltip';
 import * as vega from 'vega';
 import {Popup} from '../../components/popup';
-import {Spec} from 'vega';
+import {None, Spec} from 'vega';
 import ErrorBoundary from '../../components/error-boundary/renderer';
 import {InsertTextFormat} from 'vscode-languageserver-types';
 import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
@@ -112,15 +112,15 @@ export function CreateFlameChart({
 
   const svg = d3.select(chartRef.current);
 
-  const dataSet = React.useMemo(() => {
-    const parents = new Set<string>();
+  const parents = React.useMemo(() => {
+    const results = new Set<string>();
 
     if (flameInput) {
       for (const item of flameInput) {
-        if (item.parent) parents.add(item.parent);
+        if (item.parent) results.add(item.parent);
       }
     }
-    return [...parents];
+    return [...results];
   }, [flameInput]);
 
   const tree_data = React.useMemo(() => {
@@ -129,33 +129,12 @@ export function CreateFlameChart({
   }, [flameInput]);
 
   React.useEffect(() => {
-    if (tree_data && dataSet.length != 0) {
+    if (tree_data && parents.length != 0) {
       console.log(tree_data);
       const data = partition(tree_data);
       let focus = data;
       console.log(data, 'datainput');
-      // const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
-      const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, dataSet.length + 1));
-      // // const color = d3.scaleOrdinal(data.parent, d3.schemeCategory10);
-
-      // var hue = d3.scaleOrdinal()
-      // .domain([...dataSet])
-      // .range(d3.schemeTableau10);
-      // console.log((dataSet),"datamap")
-
-      // var luminance = d3.scaleSqrt()
-      //     .domain([0, 1e6])
-      //     .clamp(true)
-      //     .range([90, 20]);
-
-      // const color = (d) => {
-      //     // var p = d;
-      //     // while (p.depth > 1) p = p.parent;
-      //     // var c = d3.lab(hue(p.id));
-      //     // c.l = luminance(d.sum);
-      //     // return c;
-      //     return hue(d.parent)
-      // }
+      const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, parents.length + 1));
 
       const clicked = (event, p) => {
         if (p.depth != 0) {
@@ -209,10 +188,17 @@ export function CreateFlameChart({
 
       const onHover = (d, i) => {
         console.log(i);
-        rect.attr('fill-opacity', (x) => {
-          return x == i ? 0.6 : 0.1;
+        // if ((hover && !hover.ids.length)) {
+        //     rect.attr('fill-opacity', (x) => {
+        //         return x == i ? 0.6 : 0.1;
+        //       });
+        // }
+        rect.attr('stroke', (x) => {
+          return x == i ? 'red' : None;
         });
       };
+
+      svg.selectAll('g').remove();
 
       const cell = svg
         .selectAll('g')
@@ -227,15 +213,16 @@ export function CreateFlameChart({
         .attr('fill-opacity', 0.6)
         .attr('fill', (d: any) => {
           if (!d.depth) return '#ccc';
-          // while (d.depth > 1) d = d.parent;
-          // return color(d.data.id);
           return color(d.parent.data.id);
         })
         .style('cursor', 'pointer')
+        .style('stroke-width', 2)
         .on('click', clicked);
       rect.on('mouseover', onHover).on('mouseout', () => {
-        rect.attr('fill-opacity', 0.6);
+        // if (hover && !hover.ids.length) rect.attr('fill-opacity', 0.6);
+        rect.attr('stroke', None);
       });
+
       svg.on('dblclick', dblclick);
 
       const text = cell
@@ -255,11 +242,9 @@ export function CreateFlameChart({
         .append('tspan')
         .attr('x', 0)
         .attr('dy', '1em')
-        .text((d: any) => `${format(d.value)}`);
+        .text((d: any) => `${format(d.data.time !== undefined ? d.data.time : d.value)}`);
 
       const tspan = text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
-      // .attr("dy", "1.2em")
-      // .text(d => ` ${format(d.value)}`);
 
       cell.append('title').text(
         (d: any) =>
@@ -267,10 +252,56 @@ export function CreateFlameChart({
             .ancestors()
             .map((i) => i.data.id)
             .reverse()
-            .join('/')}\n${format(d.value)}`
+            .join('/')}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`
       );
     }
   }, [tree_data]);
+
+  React.useEffect(() => {
+    const values = [];
+    if (hover) {
+      for (const id of hover.ids) {
+        values.push(id);
+      }
+      for (const path of hover.paths) {
+        values.push(path);
+      }
+    }
+    // const rect =
+    // rect.attr('fill-opacity', (d: any) => {
+    //     if (!d.depth) return 0.1
+    //     return (values.includes(d.data.id)? 0.8:0.1)
+    // });
+    d3.select(chartRef.current)
+      .selectAll('rect')
+      .attr('stroke', (x: any) => {
+        if (!x.depth) return None;
+        return values.includes(x.data.id) ? 'red' : None;
+      });
+  }, [hover]);
+
+  React.useEffect(() => {
+    const values = [];
+
+    if (highlight) {
+      for (const id of hover.ids) {
+        values.push(id);
+      }
+      for (const path of hover.paths) {
+        values.push(path);
+      }
+
+      console.log(values, 'd3highlight');
+      d3.select(chartRef.current)
+        .selectAll('rect')
+        .attr('fill-opacity', (d: any) => {
+          if (!d.depth) return 0.1;
+          return values.includes(d.data.id) ? 0.8 : 0.1;
+        });
+    } else {
+      d3.select(chartRef.current).selectAll('rect').attr('fill-opacity', 0.6);
+    }
+  }, [highlight]);
 
   const renderer = (
     <div style={{backgroundColor: 'white'}}>
@@ -284,19 +315,12 @@ export function CreateFlameChart({
       </Popup>
       <div className="chart" aria-label="performance flame chart" style={{}}>
         <svg height={height} width={width} ref={chartRef} fontSize="10" />
-        {/* <div className="chart-resize-handle">
-            <svg width="10" height="10">
-            <path d="M-2,13L13,-2 M-2,16L16,-2 M-2,19L19,-2" />
-            </svg>
-            </div> */}
       </div>
     </div>
   );
   return (
     <div>
-      {/* <div className="chartcontainer"> */}
       <ErrorBoundary>{renderer}</ErrorBoundary>
-      {/* </div> */}
     </div>
   );
 }
@@ -305,15 +329,12 @@ const width = 975;
 const height = 200;
 
 const partition = (data) => {
-  // console.log(tree(data))
-  // const stratify_data = tree(data)
-  // console.log(stratify_data)
   const root = d3.hierarchy(data).sum((d: any) => d.value);
   // .sort((a, b) =>  b.data.name - a.data.name);
   return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
 };
 
-const format = d3.format(',d');
+const format = d3.format('.2f');
 
 const tree = (data) => {
   // Map element name to arr index

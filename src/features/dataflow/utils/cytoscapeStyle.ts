@@ -50,7 +50,15 @@ export const style: cytoscape.Stylesheet[] = [
     style: {
       'overlay-color': 'blue',
       'overlay-opacity': 0.7,
-      shape: 'triangle',
+    },
+  },
+  {
+    selector: '.hoverNodes',
+    style: {
+      'border-color': 'red',
+      'overlay-color': 'yellow',
+      'overlay-opacity': 0.7,
+      'border-width': '5',
     },
   },
   {

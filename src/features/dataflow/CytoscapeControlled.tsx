@@ -91,10 +91,10 @@ export function CytoscapeControlled({
       }
       onHover(null);
     });
-    cy.on('dblclick', (event) => {
-      event.preventDefault();
-      cy.elements(`node[id = "${event.target.id()}"]`).classes('highlightNodes');
-    });
+    // cy.on('dblclick', (event) => {
+    //   event.preventDefault();
+    //   cy.elements(`node[id = "${event.target.id()}"]`).classes('highlightNodes');
+    // });
     return () => {
       cy.destroy();
       onHover(null);
@@ -205,12 +205,16 @@ export function CytoscapeControlled({
 
   React.useEffect(() => {
     const cy = cyRef.current;
-    cy.nodes('node').removeClass('highlightNodes');
+    cy.nodes('node').removeClass('hoverNodes');
+    console.log(hoverByFlame);
 
     if (hoverByFlame) {
       hoverByFlame.ids.forEach((id) => {
-        cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
+        cy.elements(`node[id = "${id}"]`).classes('hoverNodes');
       });
+      // hoverByFlame.paths.forEach((id) => {
+      //   cy.elements(`node[id = "${id}"]`).classes('hoverNodes');
+      // });
     }
   }, [cyRef.current, hoverByFlame]);
 

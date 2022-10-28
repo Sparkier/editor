@@ -4,6 +4,7 @@ import * as EditorActions from '../../../actions/editor';
 import {State} from '../../../constants/default-state';
 import Renderer from './renderer';
 import {setHighlight} from '../../../features/dataflow/highlightSlice';
+import {setHover} from '../../../features/dataflow/hoverSlice';
 
 export function mapStateToProps(state: State) {
   return {
@@ -25,6 +26,8 @@ export function mapStateToProps(state: State) {
     value: state.editorString,
     view: state.view,
     ranges: state.ranges,
+    hover: state.hover,
+    highlight: state.highlight,
   };
 }
 
@@ -45,6 +48,7 @@ export function mapDispatchToProps(dispatch: Dispatch<EditorActions.Action>) {
       updateVegaSpec: EditorActions.updateVegaSpec,
       setHighlight: setHighlight,
       setRanges: EditorActions.setRanges,
+      setHover: setHover,
     },
     dispatch
   );

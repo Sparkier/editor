@@ -14,3 +14,10 @@
 .editor-header.right-align {
   justify-content: flex-end;
 }
+
+.myGlyphMarginClass {
+  background: red;
+}
+.myContentClass {
+  background: lightblue;
+}

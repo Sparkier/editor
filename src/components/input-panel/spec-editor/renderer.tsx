@@ -21,6 +21,7 @@ type Props = ReturnType<typeof mapStateToProps> &
 class Editor extends React.PureComponent<Props> {
   public editor: Monaco.editor.IStandaloneCodeEditor;
   public hover: Monaco.IDisposable;
+  public prevDecoratorID: string[] = [];
   constructor(props: Props) {
     super(props);
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -46,30 +47,26 @@ class Editor extends React.PureComponent<Props> {
     }
   }
   public mouseDownHandler(event) {
-    const line = event.target.position.lineNumber - 1;
-    if (line in this.props.ranges) {
-      const path = this.props.ranges[line].path;
-      const path_str = path
-        .map((x) => {
-          if (typeof x === 'string') return `["${x}"]`;
-          return `[${x}]`;
-        })
-        .join('');
-      console.log(this.props.view, 'binidng');
-
-      const mapping = this.props.view['mapping'];
-
-      const to_highlight = [];
-      for (const key in mapping) {
-        if (key.includes(path_str)) to_highlight.push(...mapping[key]);
-      }
-
-      this.props.setHighlight({path: path_str, ids: to_highlight});
+    this.props.setHighlight(this.props.hover);
+    const range = this.props.hover?.selected;
+    if (range) {
+      this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
+        {
+          range: new Monaco.Range(range.startLine + 1, 1, range.endLine + 1, 1),
+          options: {
+            isWholeLine: true,
+            className: 'myContentClass',
+            glyphMarginClassName: 'myGlyphMarginClass',
+          },
+        },
+      ]);
+    } else {
+      this.editor.deltaDecorations(this.prevDecoratorID, []);
     }
   }
 
   public hoverHandler(lineNumber) {
-    if (!lineNumber) this.props.setHighlight(null);
+    if (!lineNumber) this.props.setHover(null);
     const line = lineNumber - 1;
     if (line in this.props.ranges) {
       const path = this.props.ranges[line].path;
@@ -83,12 +80,17 @@ class Editor extends React.PureComponent<Props> {
 
       const mapping = this.props.view['mapping'];
 
-      const to_highlight = [];
+      const ids = [];
+      const paths = [path_str];
       for (const key in mapping) {
-        if (key.includes(path_str)) to_highlight.push(...mapping[key]);
+        if (key.includes(path_str)) {
+          ids.push(...mapping[key]);
+          paths.push(key);
+        }
       }
 
-      this.props.setHighlight({path: path_str, ids: to_highlight});
+      // this.props.setHighlight({path: path_str, ids: to_highlight});
+      this.props.setHover({paths, ids, selected: this.props.ranges[line]});
     }
   }
 
@@ -160,7 +162,8 @@ class Editor extends React.PureComponent<Props> {
     monaco.editor.defineTheme('my-theme', {
       base: 'vs',
       colors: {
-        'editor.hoverHighlightBackground': '#00ff00',
+        'editor.hoverHighlightBackground': '#0000FF20',
+        // 'editor.lineHighlightBackground': '#00ff00',
       },
       rules: [],
       inherit: true,
@@ -169,6 +172,7 @@ class Editor extends React.PureComponent<Props> {
     monaco.editor.setTheme('my-theme');
 
     editor.onMouseDown(this.mouseDownHandler);
+    editor.onMouseMove(() => this.hoverHandler(null));
 
     editor.addAction({
       contextMenuGroupId: 'vega',

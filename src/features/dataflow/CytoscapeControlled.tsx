@@ -210,7 +210,7 @@ export function CytoscapeControlled({
 
     if (hoverByFlame) {
       hoverByFlame.ids.forEach((id) => {
-        cy.elements(`node[id = "${id}"]`).classes('hoverNodes');
+        cy.elements(`node[id = "${id}"]`).addClass('hoverNodes');
       });
       // hoverByFlame.paths.forEach((id) => {
       //   cy.elements(`node[id = "${id}"]`).classes('hoverNodes');

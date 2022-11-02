@@ -12,7 +12,6 @@ import * as vega from 'vega';
 import {Popup} from '../../components/popup';
 import {None, Spec} from 'vega';
 import ErrorBoundary from '../../components/error-boundary/renderer';
-import {InsertTextFormat} from 'vscode-languageserver-types';
 import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
 
 export function FlameChart() {
@@ -100,15 +99,13 @@ export function CreateFlameChart({
   highlight,
   hover,
 }: {
-  // pulses: PulsesState;
-  // selected: Values | null;
-  // mapping: any;
   flameInput: any;
   highlight: Highlight | null;
   hover: Hover | null;
 }) {
   const chartRef = React.useRef(null);
   const dispatch = useDispatch();
+  const hoverRef = React.useRef(null);
 
   const svg = d3.select(chartRef.current);
 
@@ -159,6 +156,8 @@ export function CreateFlameChart({
           text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d.target));
           tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d.target) as any) * 0.7);
         }
+
+        dispatch(setHighlight(hoverRef.current));
       };
 
       const dblclick = () => {
@@ -172,6 +171,8 @@ export function CreateFlameChart({
         rect.transition(t).attr('width', (d: any) => rectWidth(d));
         text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d));
         tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+
+        dispatch(setHighlight(null));
       };
 
       const rectWidth = (d) => {
@@ -196,6 +197,24 @@ export function CreateFlameChart({
         rect.attr('stroke', (x) => {
           return x == i ? 'red' : None;
         });
+
+        const target: Highlight = {paths: [i.data.id], ids: []};
+        const queue = [i];
+
+        while (queue.length) {
+          const curr = queue.shift();
+          if (!curr.children) {
+            target.ids.push(curr.data.id);
+          } else {
+            for (const child of curr.children) {
+              queue.push(child);
+              target.paths.push(child.data.id);
+            }
+          }
+        }
+
+        dispatch(setHover(target));
+        hoverRef.current = target;
       };
 
       svg.selectAll('g').remove();
@@ -221,6 +240,7 @@ export function CreateFlameChart({
       rect.on('mouseover', onHover).on('mouseout', () => {
         // if (hover && !hover.ids.length) rect.attr('fill-opacity', 0.6);
         rect.attr('stroke', None);
+        dispatch(setHover(null));
       });
 
       svg.on('dblclick', dblclick);

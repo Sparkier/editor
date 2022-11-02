@@ -89,7 +89,6 @@ class Editor extends React.PureComponent<Props> {
         }
       }
 
-      // this.props.setHighlight({path: path_str, ids: to_highlight});
       this.props.setHover({paths, ids, selected: this.props.ranges[line]});
     }
   }

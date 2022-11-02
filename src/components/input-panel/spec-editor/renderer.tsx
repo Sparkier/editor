@@ -290,8 +290,8 @@ class Editor extends React.PureComponent<Props> {
             setHover(position.lineNumber);
             return {
               range: new Monaco.Range(
-                selected.startLine,
-                model.getLineMaxColumn(selected.startLine),
+                selected.startLine + 1,
+                1,
                 selected.endLine + 1,
                 model.getLineMaxColumn(selected.endLine + 1)
               ),

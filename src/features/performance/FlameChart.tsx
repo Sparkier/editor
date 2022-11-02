@@ -125,6 +125,21 @@ export function CreateFlameChart({
     return null;
   }, [flameInput]);
 
+  // const dblclick = () => {
+  //   focus = data;
+
+  //   const t = cell
+  //     .transition()
+  //     .duration(750)
+  //     .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
+
+  //   rect.transition(t).attr('width', (d: any) => rectWidth(d));
+  //   text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d));
+  //   tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+
+  //   dispatch(setHighlight(null));
+  // };
+
   React.useEffect(() => {
     if (tree_data && parents.length != 0) {
       console.log(tree_data);
@@ -296,7 +311,7 @@ export function CreateFlameChart({
       .selectAll('rect')
       .attr('stroke', (x: any) => {
         if (!x.depth) return None;
-        return values.includes(x.data.id) ? 'red' : None;
+        return values.includes(x.data.id) || values.includes(x.data.parent) ? 'red' : None;
       });
   }, [hover]);
 
@@ -304,10 +319,10 @@ export function CreateFlameChart({
     const values = [];
 
     if (highlight) {
-      for (const id of hover.ids) {
+      for (const id of highlight.ids) {
         values.push(id);
       }
-      for (const path of hover.paths) {
+      for (const path of highlight.paths) {
         values.push(path);
       }
 
@@ -316,10 +331,11 @@ export function CreateFlameChart({
         .selectAll('rect')
         .attr('fill-opacity', (d: any) => {
           if (!d.depth) return 0.1;
-          return values.includes(d.data.id) ? 0.8 : 0.1;
+          return values.includes(d.data.id) || values.includes(d.data.parent) ? 0.8 : 0.1;
         });
     } else {
       d3.select(chartRef.current).selectAll('rect').attr('fill-opacity', 0.6);
+      dispatch(setHighlight(null));
     }
   }, [highlight]);
 

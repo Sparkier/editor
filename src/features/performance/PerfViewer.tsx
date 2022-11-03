@@ -37,7 +37,7 @@ export class PerfViewer extends React.Component<
         </div>
         <div className="perf-chart">
           {/* <PerfChart /> */}
-          <Flame />
+          <FlameChart />
           <Graph />
         </div>
       </div>
@@ -50,4 +50,10 @@ export function Graph() {
   useRecomputeLayout();
   const cytoscape = React.useMemo(() => <Cytoscape />, []);
   return <div className="graph">{cytoscape}</div>;
+}
+
+export function FlameChart() {
+  const flame_chart = React.useMemo(() => <Flame />, []);
+
+  return <div>{flame_chart}</div>;
 }

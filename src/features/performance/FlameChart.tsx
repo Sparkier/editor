@@ -7,18 +7,10 @@ import {State} from '../../constants/default-state';
 import {selectedPulseSelector} from '../dataflow/selectionSlice';
 import {Pulse, pulsesSelector, PulsesState, Values} from '../dataflow/pulsesSlice';
 import {createSelector} from '@reduxjs/toolkit';
-import vegaTooltip from 'vega-tooltip';
-import * as vega from 'vega';
 import {Popup} from '../../components/popup';
 import {None, Spec} from 'vega';
 import ErrorBoundary from '../../components/error-boundary/renderer';
 import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
-
-export function FlameChart() {
-  const flame_chart = React.useMemo(() => <Flame />, []);
-
-  return flame_chart;
-}
 
 export function Flame() {
   const pulse = useSelector<State>(selectedPulseSelector); // pulse selected by the sidebar
@@ -118,27 +110,12 @@ export function CreateFlameChart({
       }
     }
     return [...results];
-  }, [flameInput]);
+  }, [chartRef.current, flameInput]);
 
   const tree_data = React.useMemo(() => {
-    if (flameInput) return tree(flameInput)[0];
+    if (flameInput) return tree(JSON.parse(JSON.stringify(flameInput)))[0];
     return null;
   }, [flameInput]);
-
-  // const dblclick = () => {
-  //   focus = data;
-
-  //   const t = cell
-  //     .transition()
-  //     .duration(750)
-  //     .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
-
-  //   rect.transition(t).attr('width', (d: any) => rectWidth(d));
-  //   text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d));
-  //   tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
-
-  //   dispatch(setHighlight(null));
-  // };
 
   React.useEffect(() => {
     if (tree_data && parents.length != 0) {
@@ -232,12 +209,20 @@ export function CreateFlameChart({
         hoverRef.current = target;
       };
 
-      svg.selectAll('g').remove();
+      d3.select(chartRef.current).selectAll('g').remove();
 
-      const cell = svg
+      const cell = d3
+        .select(chartRef.current)
         .selectAll('g')
         .data(data.descendants())
-        .join('g')
+        .join(
+          function (enter) {
+            return enter.append('g');
+          },
+          function (exit) {
+            return exit.remove();
+          }
+        )
         .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
 
       const rect = cell
@@ -290,7 +275,7 @@ export function CreateFlameChart({
             .join('/')}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`
       );
     }
-  }, [tree_data]);
+  }, [chartRef.current, tree_data]);
 
   React.useEffect(() => {
     const values = [];

@@ -100,6 +100,14 @@ export function CreateFlameChart({
   const hoverRef = React.useRef(null);
 
   const svg = d3.select(chartRef.current);
+  const width = 975;
+  const height = 200;
+
+  const partition = (data) => {
+    const root = d3.hierarchy(data).sum((d: any) => d.value);
+    // .sort((a, b) =>  b.data.name - a.data.name);
+    return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
+  };
 
   const parents = React.useMemo(() => {
     const results = new Set<string>();
@@ -335,7 +343,7 @@ export function CreateFlameChart({
         <div className="chart-overlay"></div>
       </Popup>
       <div className="chart" aria-label="performance flame chart" style={{}}>
-        <svg height={height} width={width} ref={chartRef} fontSize="10" />
+        <svg className="chartSVG" viewBox={`0 0 ${width} ${height}`} ref={chartRef} fontSize="10" />
       </div>
     </div>
   );
@@ -345,15 +353,6 @@ export function CreateFlameChart({
     </div>
   );
 }
-
-const width = 975;
-const height = 200;
-
-const partition = (data) => {
-  const root = d3.hierarchy(data).sum((d: any) => d.value);
-  // .sort((a, b) =>  b.data.name - a.data.name);
-  return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
-};
 
 const format = d3.format('.2f');
 

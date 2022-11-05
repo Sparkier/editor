@@ -331,7 +331,6 @@ class Editor extends React.PureComponent<Props> {
             },
           ]);
 
-          this.props.hover.selected = range;
           this.editor.revealLineInCenter(range['startLine'] + 1);
           break;
         }
@@ -341,21 +340,28 @@ class Editor extends React.PureComponent<Props> {
     }
 
     if (this.props.highlight) {
-      this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
-        {
-          range: new Monaco.Range(
-            this.props.highlight.selected['startLine'] + 1,
-            1,
-            this.props.highlight.selected['endLine'] + 2,
-            1
-          ),
-          options: {
-            isWholeLine: true,
-            className: 'myContentClass',
-          },
-        },
-      ]);
-      this.editor.revealLineInCenter(this.props.highlight.selected['startLine'] + 1);
+      for (const [startLine, range] of Object.entries(this.props.ranges)) {
+        const path_str = range['path']
+          .map((x) => {
+            if (typeof x === 'string') return `["${x}"]`;
+            return `[${x}]`;
+          })
+          .join('');
+        if (path_str === this.props.highlight.target) {
+          this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
+            {
+              range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
+              options: {
+                isWholeLine: true,
+                className: 'myContentClass',
+              },
+            },
+          ]);
+
+          this.editor.revealLineInCenter(range['startLine'] + 1);
+          break;
+        }
+      }
     }
   }
 

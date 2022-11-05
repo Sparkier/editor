@@ -189,17 +189,14 @@ export function CreateFlameChart({
 
       const onHover = (d, i) => {
         console.log(i);
-        // if ((hover && !hover.ids.length)) {
-        //     rect.attr('fill-opacity', (x) => {
-        //         return x == i ? 0.6 : 0.1;
-        //       });
-        // }
+
         rect.attr('stroke', (x) => {
           return x == i ? 'red' : None;
         });
 
         const target: Highlight = {paths: [i.data.id], ids: []};
         const queue = [i];
+        target.target = i.children ? i.data.id : i.data.parent;
 
         while (queue.length) {
           const curr = queue.shift();
@@ -223,14 +220,9 @@ export function CreateFlameChart({
         .select(chartRef.current)
         .selectAll('g')
         .data(data.descendants())
-        .join(
-          function (enter) {
-            return enter.append('g');
-          },
-          function (exit) {
-            return exit.remove();
-          }
-        )
+        .join(function (enter) {
+          return enter.append('g');
+        })
         .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
 
       const rect = cell
@@ -246,7 +238,6 @@ export function CreateFlameChart({
         .style('stroke-width', 2)
         .on('click', clicked);
       rect.on('mouseover', onHover).on('mouseout', () => {
-        // if (hover && !hover.ids.length) rect.attr('fill-opacity', 0.6);
         rect.attr('stroke', None);
         dispatch(setHover(null));
       });
@@ -274,14 +265,9 @@ export function CreateFlameChart({
 
       const tspan = text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
-      cell.append('title').text(
-        (d: any) =>
-          `${d
-            .ancestors()
-            .map((i) => i.data.id)
-            .reverse()
-            .join('/')}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`
-      );
+      cell
+        .append('title')
+        .text((d: any) => `${d.data.id}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
     }
   }, [chartRef.current, tree_data]);
 
@@ -295,11 +281,7 @@ export function CreateFlameChart({
         values.push(path);
       }
     }
-    // const rect =
-    // rect.attr('fill-opacity', (d: any) => {
-    //     if (!d.depth) return 0.1
-    //     return (values.includes(d.data.id)? 0.8:0.1)
-    // });
+
     d3.select(chartRef.current)
       .selectAll('rect')
       .attr('stroke', (x: any) => {

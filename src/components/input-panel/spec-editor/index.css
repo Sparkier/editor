@@ -15,9 +15,10 @@
   justify-content: flex-end;
 }
 
-.myGlyphMarginClass {
-  background: red;
-}
 .myContentClass {
   background: lightblue;
+}
+
+.hoverByFlame {
+  background: #0000ff20;
 }

@@ -13,6 +13,7 @@ import './index.css';
 import {parse as parseJSONC} from 'jsonc-parser';
 import {TextDocument} from 'vscode-json-languageservice';
 import {getFoldingRanges} from './getRanges';
+import {values} from 'vega-lite/src/compile/axis/properties';
 
 type Props = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps> &
@@ -311,6 +312,19 @@ class Editor extends React.PureComponent<Props> {
     }
 
     if (this.props.hover) {
+      // check what the target should be from paths or ids
+      let target;
+      if (!this.props.hover.target) {
+        if (this.props.hover.paths.length == 1) target = this.props.hover.paths[0];
+        if (this.props.hover.ids.length == 1) {
+          const target_id = this.props.hover.ids[0];
+          for (const [key, ids] of Object.entries(this.props.view['mapping'] as Object)) {
+            if (ids.includes(target_id) || (!target_id.includes(':') && ids.includes(parseInt(target_id)))) {
+              target = key;
+            }
+          }
+        }
+      }
       for (const [startLine, range] of Object.entries(this.props.ranges)) {
         const path_str = range['path']
           .map((x) => {
@@ -318,7 +332,7 @@ class Editor extends React.PureComponent<Props> {
             return `[${x}]`;
           })
           .join('');
-        if (path_str === this.props.hover.target) {
+        if (path_str === this.props.hover.target || path_str === target) {
           console.log(path_str);
 
           this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [

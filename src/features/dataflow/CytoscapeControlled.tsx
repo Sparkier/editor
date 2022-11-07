@@ -31,6 +31,7 @@ export function CytoscapeControlled({
   onSelect,
   highlight,
   hoverByFlame,
+  perfHover,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -40,6 +41,7 @@ export function CytoscapeControlled({
   onHover: (target: null | {type: 'node' | 'edge'; id: string; referenceClientRect: DOMRect}) => void;
   highlight: Highlight | null;
   hoverByFlame: Hover | null;
+  perfHover;
 }) {
   console.log(highlight, 'highlight');
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -84,12 +86,19 @@ export function CytoscapeControlled({
         id: target.id(),
         referenceClientRect: target.popperRef().getBoundingClientRect(),
       });
+      if (target.isNode()) {
+        perfHover({
+          paths: [],
+          ids: [target.id()],
+        });
+      }
     });
     cy.on('mouseout', ({target}) => {
       if (target === cy) {
         return;
       }
       onHover(null);
+      perfHover(null);
     });
     // cy.on('dblclick', (event) => {
     //   event.preventDefault();
@@ -98,6 +107,7 @@ export function CytoscapeControlled({
     return () => {
       cy.destroy();
       onHover(null);
+      perfHover(null);
     };
   }, [divRef.current, onHover, onSelect]);
 

@@ -276,6 +276,7 @@ export function CreateFlameChart({
     if (hover) {
       for (const id of hover.ids) {
         values.push(id);
+        if (typeof id === 'string' && !id.includes(':')) values.push(parseInt(id));
       }
       for (const path of hover.paths) {
         values.push(path);

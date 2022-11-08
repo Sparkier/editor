@@ -15,10 +15,10 @@
   justify-content: flex-end;
 }
 
-.myContentClass {
-  background: lightblue;
+.selectedLines {
+  background: #0066cc60;
 }
 
 .hoverByFlame {
-  background: #0000ff20;
+  background: #0066cc20;
 }

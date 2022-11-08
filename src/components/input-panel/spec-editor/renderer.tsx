@@ -56,7 +56,7 @@ class Editor extends React.PureComponent<Props> {
           range: new Monaco.Range(range.startLine + 1, 1, range.endLine + 1, 1),
           options: {
             isWholeLine: true,
-            className: 'myContentClass',
+            className: 'selectedLines',
           },
         },
       ]);
@@ -161,7 +161,7 @@ class Editor extends React.PureComponent<Props> {
     monaco.editor.defineTheme('my-theme', {
       base: 'vs',
       colors: {
-        'editor.hoverHighlightBackground': '#0000FF20',
+        'editor.hoverHighlightBackground': '#0066cc20',
         // 'editor.lineHighlightBackground': '#00ff00',
       },
       rules: [],
@@ -367,7 +367,7 @@ class Editor extends React.PureComponent<Props> {
               range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
               options: {
                 isWholeLine: true,
-                className: 'myContentClass',
+                className: 'selectedLines',
               },
             },
           ]);

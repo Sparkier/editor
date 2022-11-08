@@ -48,16 +48,18 @@ export const style: cytoscape.Stylesheet[] = [
   {
     selector: '.highlightNodes',
     style: {
-      'overlay-color': 'blue',
-      'overlay-opacity': 0.7,
+      'border-color': '#0066cc',
+      'underlay-color': '#0066cc',
+      'underlay-opacity': 0.38,
+      'border-width': '5',
     },
   },
   {
     selector: '.hoverNodes',
     style: {
-      'border-color': 'red',
-      'overlay-color': 'yellow',
-      'overlay-opacity': 0.7,
+      'border-color': '#0066cc',
+      'underlay-color': '#0066cc',
+      'underlay-opacity': 0.13,
       'border-width': '5',
     },
   },

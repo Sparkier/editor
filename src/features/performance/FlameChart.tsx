@@ -2,26 +2,22 @@ import * as d3 from 'd3';
 import * as React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {useAppSelector} from '../../hooks';
-import {selectionSelector, selectedHighlightSelector, Highlight, setHighlight} from '../dataflow/highlightSlice';
+import {selectedHighlightSelector, Highlight, setHighlight} from '../dataflow/highlightSlice';
 import {State} from '../../constants/default-state';
 import {selectedPulseSelector} from '../dataflow/selectionSlice';
-import {Pulse, pulsesSelector, PulsesState, Values} from '../dataflow/pulsesSlice';
+import {pulsesSelector} from '../dataflow/pulsesSlice';
 import {createSelector} from '@reduxjs/toolkit';
 import {Popup} from '../../components/popup';
-import {None, Spec} from 'vega';
-import ErrorBoundary from '../../components/error-boundary/renderer';
+import {None} from 'vega';
+import ErrorBoundary from '../../components/error-boundary';
 import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
 
 export function Flame() {
-  const pulse = useSelector<State>(selectedPulseSelector); // pulse selected by the sidebar
-
   const selectedValuesSelector = createSelector(pulsesSelector, selectedPulseSelector, (pulses, selected) =>
     selected === null ? null : pulses.find((p) => p.clock === selected).values
   );
   const selectedValues = useAppSelector(selectedValuesSelector);
   const all_pulses = useAppSelector((state) => state.pulses);
-  console.log(all_pulses, 'defalutdpulse??');
-  console.log(pulse, 'pulse??');
   const highlight: Highlight = useAppSelector(selectedHighlightSelector);
   const hover: Hover = useAppSelector(hoverSelector);
 
@@ -105,7 +101,6 @@ export function CreateFlameChart({
 
   const partition = (data) => {
     const root = d3.hierarchy(data).sum((d: any) => d.value);
-    // .sort((a, b) =>  b.data.name - a.data.name);
     return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
   };
 
@@ -127,10 +122,8 @@ export function CreateFlameChart({
 
   React.useEffect(() => {
     if (tree_data && parents.length != 0) {
-      console.log(tree_data);
       const data = partition(tree_data);
       let focus = data;
-      console.log(data, 'datainput');
       const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, parents.length + 1));
 
       const clicked = (event, p) => {
@@ -188,8 +181,6 @@ export function CreateFlameChart({
       };
 
       const onHover = (d, i) => {
-        console.log(i);
-
         rect.attr('stroke', (x) => {
           return x == i ? 'red' : None;
         });
@@ -302,7 +293,6 @@ export function CreateFlameChart({
         values.push(path);
       }
 
-      console.log(values, 'd3highlight');
       d3.select(chartRef.current)
         .selectAll('rect')
         .attr('fill-opacity', (d: any) => {

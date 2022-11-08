@@ -2,10 +2,8 @@ import * as React from 'react';
 import {Pulses} from '../dataflow/Sidebar';
 import './PerfViewer.css';
 import {Flame} from './FlameChart';
-import {PerfChart} from './PerfChart';
 import {useRecomputeLayout} from '../dataflow/layoutSlice';
 import {Cytoscape} from '../dataflow/Cytoscape';
-// import '../dataflow/Graph.css';
 
 /**
  * Wrap the component so we can catch the errors. We don't use the previously defined
@@ -36,7 +34,6 @@ export class PerfViewer extends React.Component<
           <Pulses />
         </div>
         <div className="perf-chart">
-          {/* <PerfChart /> */}
           <FlameChart />
           <Graph />
         </div>

@@ -278,7 +278,7 @@ export function CreateFlameChart({
       .selectAll('rect')
       .attr('stroke', (x: any) => {
         if (!x.depth) return None;
-        return values.includes(x.data.id) || values.includes(x.data.parent) ? 'red' : None;
+        return values.includes(x.data.id) || values.includes(x.data.parent) ? '#0066cc' : None;
       });
   }, [hover]);
 

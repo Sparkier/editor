@@ -43,7 +43,6 @@ export function CytoscapeControlled({
   hoverByFlame: Hover | null;
   perfHover;
 }) {
-  console.log(highlight, 'highlight');
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
   const layoutRef = React.useRef<cytoscape.Layouts | null>(null);
@@ -100,10 +99,6 @@ export function CytoscapeControlled({
       onHover(null);
       perfHover(null);
     });
-    // cy.on('dblclick', (event) => {
-    //   event.preventDefault();
-    //   cy.elements(`node[id = "${event.target.id()}"]`).classes('highlightNodes');
-    // });
     return () => {
       cy.destroy();
       onHover(null);
@@ -216,15 +211,11 @@ export function CytoscapeControlled({
   React.useEffect(() => {
     const cy = cyRef.current;
     cy.nodes('node').removeClass('hoverNodes');
-    console.log(hoverByFlame);
 
     if (hoverByFlame) {
       hoverByFlame.ids.forEach((id) => {
         cy.elements(`node[id = "${id}"]`).addClass('hoverNodes');
       });
-      // hoverByFlame.paths.forEach((id) => {
-      //   cy.elements(`node[id = "${id}"]`).classes('hoverNodes');
-      // });
     }
   }, [cyRef.current, hoverByFlame]);
 

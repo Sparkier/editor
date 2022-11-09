@@ -13,7 +13,6 @@ import './index.css';
 import {parse as parseJSONC} from 'jsonc-parser';
 import {TextDocument} from 'vscode-json-languageservice';
 import {getFoldingRanges} from './getRanges';
-import {values} from 'vega-lite/src/compile/axis/properties';
 
 type Props = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps> &
@@ -47,7 +46,8 @@ class Editor extends React.PureComponent<Props> {
       }
     }
   }
-  public mouseDownHandler(event) {
+
+  public mouseDownHandler() {
     this.props.setHighlight(this.props.hover);
     const range = this.props.hover?.selected;
     if (range) {
@@ -65,7 +65,7 @@ class Editor extends React.PureComponent<Props> {
     }
   }
 
-  public hoverHandler(lineNumber) {
+  public hoverHandler(lineNumber: number | undefined) {
     if (!lineNumber) this.props.setHover(null);
     const line = lineNumber - 1;
     if (line in this.props.ranges) {
@@ -76,7 +76,6 @@ class Editor extends React.PureComponent<Props> {
           return `[${x}]`;
         })
         .join('');
-      console.log(this.props.view, 'binding');
 
       const mapping = this.props.view['mapping'];
 
@@ -162,7 +161,6 @@ class Editor extends React.PureComponent<Props> {
       base: 'vs',
       colors: {
         'editor.hoverHighlightBackground': '#0066cc20',
-        // 'editor.lineHighlightBackground': '#00ff00',
       },
       rules: [],
       inherit: true,
@@ -232,7 +230,7 @@ class Editor extends React.PureComponent<Props> {
     }
   }
 
-  public editorWillMount(monaco: typeof Monaco) {
+  public editorWillMount() {
     const compressed = this.props.match.params.compressed;
     if (compressed) {
       let spec: string = LZString.decompressFromEncodedURIComponent(compressed);
@@ -251,7 +249,7 @@ class Editor extends React.PureComponent<Props> {
     }
   }
 
-  public componentDidUpdate(prevProps, prevState) {
+  public componentDidUpdate(prevProps: Props) {
     if (this.props.sidePaneItem === SIDEPANE.Editor) {
       if (prevProps.sidePaneItem !== this.props.sidePaneItem) {
         this.editor.focus();
@@ -266,19 +264,14 @@ class Editor extends React.PureComponent<Props> {
 
       if (this.hover) this.hover.dispose();
       const textDocument = TextDocument.create('', 'json', 1, this.props.value);
-      console.log(getFoldingRanges(textDocument));
       const hoverRanges = getFoldingRanges(textDocument);
       const startLine_to_range = {};
       hoverRanges.map((x) => (startLine_to_range[x.startLine] = x));
-      console.log(startLine_to_range);
       this.props.setRanges(startLine_to_range);
-      console.log(this.props.ranges, 'ranges??');
-      console.log(this.props.view, 'view??');
       const setHover = this.hoverHandler;
 
       this.hover = Monaco.languages.registerHoverProvider('json', {
         provideHover(model, position) {
-          console.log(position);
           if (position.lineNumber - 1 in startLine_to_range) {
             const selected = startLine_to_range[position.lineNumber - 1];
             const path_str = selected.path.map((x) => {
@@ -313,19 +306,19 @@ class Editor extends React.PureComponent<Props> {
 
     if (this.props.hover) {
       // check what the target should be from paths or ids
-      let target;
+      let target: string;
       if (!this.props.hover.target) {
         if (this.props.hover.paths.length == 1) target = this.props.hover.paths[0];
         if (this.props.hover.ids.length == 1) {
           const target_id = this.props.hover.ids[0];
-          for (const [key, ids] of Object.entries(this.props.view['mapping'] as Object)) {
+          for (const [key, ids] of Object.entries(this.props.view['mapping'] as Record<string, (number | string)[]>)) {
             if (ids.includes(target_id) || (!target_id.includes(':') && ids.includes(parseInt(target_id)))) {
               target = key;
             }
           }
         }
       }
-      for (const [startLine, range] of Object.entries(this.props.ranges)) {
+      for (const range of Object.values(this.props.ranges)) {
         const path_str = range['path']
           .map((x) => {
             if (typeof x === 'string') return `["${x}"]`;
@@ -333,8 +326,6 @@ class Editor extends React.PureComponent<Props> {
           })
           .join('');
         if (path_str === this.props.hover.target || path_str === target) {
-          console.log(path_str);
-
           this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
             {
               range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
@@ -354,7 +345,7 @@ class Editor extends React.PureComponent<Props> {
     }
 
     if (this.props.highlight) {
-      for (const [startLine, range] of Object.entries(this.props.ranges)) {
+      for (const range of Object.values(this.props.ranges)) {
         const path_str = range['path']
           .map((x) => {
             if (typeof x === 'string') return `["${x}"]`;

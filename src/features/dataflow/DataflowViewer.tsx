@@ -2,7 +2,6 @@ import * as React from 'react';
 import {Sidebar} from './Sidebar';
 import './DataflowViewer.css';
 import {Graph} from './Graph';
-import {PerfChart} from '../performance/PerfChart';
 
 /**
  * Wrap the component so we can catch the errors. We don't use the previously defined
@@ -31,11 +30,6 @@ export class DataflowViewer extends React.Component<
       <div className="dataflow-pane">
         <Sidebar />
         <Graph />
-
-        {/* <div className="perf-chart">
-          <PerfChart />
-          <Graph />
-        </div> */}
       </div>
     );
   }

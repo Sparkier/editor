@@ -1,7 +1,7 @@
 import {createAction, createSelector, createSlice} from '@reduxjs/toolkit';
 import {createSliceSelector} from './utils/createSliceSelector';
 
-export type Hover = {paths: string[]; ids: string[]; selected?; target?};
+export type Hover = {paths: string[]; ids: string[]; selected?; target?; source?: string};
 export type HoverState = Hover | null;
 // const initialState: HighlightState = {path: null, ids: []};
 const initialState: HoverState = null;

@@ -21,7 +21,8 @@ type Props = ReturnType<typeof mapStateToProps> &
 class Editor extends React.PureComponent<Props> {
   public editor: Monaco.editor.IStandaloneCodeEditor;
   public hover: Monaco.IDisposable;
-  public prevDecoratorID: string[] = [];
+  public prevHoverDecoratorID: string[] = [];
+  public prevSelectedDecoratorID: string[] = [];
   constructor(props: Props) {
     super(props);
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -49,9 +50,9 @@ class Editor extends React.PureComponent<Props> {
 
   public mouseDownHandler() {
     this.props.setHighlight(this.props.hover);
-    const range = this.props.hover?.selected;
+    const range = this.props.highlight?.selected;
     if (range) {
-      this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
+      this.prevSelectedDecoratorID = this.editor.deltaDecorations(this.prevSelectedDecoratorID, [
         {
           range: new Monaco.Range(range.startLine + 1, 1, range.endLine + 1, 1),
           options: {
@@ -61,15 +62,24 @@ class Editor extends React.PureComponent<Props> {
         },
       ]);
     } else {
-      this.editor.deltaDecorations(this.prevDecoratorID, []);
+      this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
     }
   }
 
-  public hoverHandler(lineNumber: number | undefined) {
-    if (!lineNumber) this.props.setHover(null);
-    const line = lineNumber - 1;
-    if (line in this.props.ranges) {
-      const path = this.props.ranges[line].path;
+  public hoverHandler(position: number | undefined) {
+    if (!position) this.props.setHover(null);
+
+    // search for the closest startLine
+    const min_diff = this.editor.getModel().getLineCount();
+    let lineNumber = null;
+    for (const range of Object.values(this.props.ranges)) {
+      if (range.startLine <= position - 1 && min_diff > position - 1 - range.startLine) {
+        lineNumber = range.startLine;
+      }
+    }
+
+    if (lineNumber in this.props.ranges) {
+      const path = this.props.ranges[lineNumber].path;
       const path_str = path
         .map((x) => {
           if (typeof x === 'string') return `["${x}"]`;
@@ -88,7 +98,7 @@ class Editor extends React.PureComponent<Props> {
         }
       }
 
-      this.props.setHover({paths, ids, selected: this.props.ranges[line]});
+      this.props.setHover({paths, ids, selected: this.props.ranges[lineNumber], target: path_str, source: 'editor'});
     }
   }
 
@@ -150,23 +160,12 @@ class Editor extends React.PureComponent<Props> {
     }
   }
 
-  public editorDidMount(editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) {
+  public editorDidMount(editor: Monaco.editor.IStandaloneCodeEditor) {
     editor.onDidFocusEditorText(() => {
       this.props.compiledEditorRef && this.props.compiledEditorRef.deltaDecorations(this.props.decorations, []);
       editor.deltaDecorations(this.props.decorations, []);
       this.props.setEditorFocus(EDITOR_FOCUS.SpecEditor);
     });
-
-    monaco.editor.defineTheme('my-theme', {
-      base: 'vs',
-      colors: {
-        'editor.hoverHighlightBackground': '#0066cc20',
-      },
-      rules: [],
-      inherit: true,
-    });
-
-    monaco.editor.setTheme('my-theme');
 
     editor.onMouseDown(this.mouseDownHandler);
     editor.onMouseMove(() => this.hoverHandler(null));
@@ -265,34 +264,15 @@ class Editor extends React.PureComponent<Props> {
       if (this.hover) this.hover.dispose();
       const textDocument = TextDocument.create('', 'json', 1, this.props.value);
       const hoverRanges = getFoldingRanges(textDocument);
-      const startLine_to_range = {};
+      const startLine_to_range = {} as {number: any};
       hoverRanges.map((x) => (startLine_to_range[x.startLine] = x));
       this.props.setRanges(startLine_to_range);
       const setHover = this.hoverHandler;
 
       this.hover = Monaco.languages.registerHoverProvider('json', {
         provideHover(model, position) {
-          if (position.lineNumber - 1 in startLine_to_range) {
-            const selected = startLine_to_range[position.lineNumber - 1];
-            const path_str = selected.path.map((x) => {
-              if (typeof x === 'string') {
-                return `['${x}']`;
-              }
-              return `[${x}]`;
-            });
-            setHover(position.lineNumber);
-            return {
-              range: new Monaco.Range(
-                selected.startLine + 1,
-                1,
-                selected.endLine + 1,
-                model.getLineMaxColumn(selected.endLine + 1)
-              ),
-              contents: [{value: '**JSON Property Path**'}, {value: path_str.join('')}],
-            };
-          } else {
-            setHover(null);
-          }
+          setHover(position.lineNumber);
+          return null;
         },
       });
     }
@@ -305,46 +285,16 @@ class Editor extends React.PureComponent<Props> {
     }
 
     if (this.props.hover) {
-      // check what the target should be from paths or ids
-      let target: string;
-      if (!this.props.hover.target) {
-        if (this.props.hover.paths.length == 1) target = this.props.hover.paths[0];
-        if (this.props.hover.ids.length == 1) {
-          const target_id = this.props.hover.ids[0];
-          for (const [key, ids] of Object.entries(this.props.view['mapping'] as Record<string, (number | string)[]>)) {
-            if (ids.includes(target_id) || (!target_id.includes(':') && ids.includes(parseInt(target_id)))) {
-              target = key;
-            }
-          }
-        }
-      }
-      for (const range of Object.values(this.props.ranges)) {
-        const path_str = range['path']
-          .map((x) => {
-            if (typeof x === 'string') return `["${x}"]`;
-            return `[${x}]`;
-          })
-          .join('');
-        if (path_str === this.props.hover.target || path_str === target) {
-          this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
-            {
-              range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
-              options: {
-                isWholeLine: false,
-                className: 'hoverByFlame',
-              },
-            },
-          ]);
-
-          this.editor.revealLineInCenter(range['startLine'] + 1);
-          break;
-        }
-      }
+      this.updateHover();
     } else {
-      this.editor.deltaDecorations(this.prevDecoratorID, []);
+      this.editor.deltaDecorations(this.prevHoverDecoratorID, []);
     }
 
-    if (this.props.highlight) {
+    if (this.props.highlight !== prevProps.highlight) {
+      if (!this.props.highlight) {
+        this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
+        return;
+      }
       for (const range of Object.values(this.props.ranges)) {
         const path_str = range['path']
           .map((x) => {
@@ -353,7 +303,7 @@ class Editor extends React.PureComponent<Props> {
           })
           .join('');
         if (path_str === this.props.highlight.target) {
-          this.prevDecoratorID = this.editor.deltaDecorations(this.prevDecoratorID, [
+          this.prevSelectedDecoratorID = this.editor.deltaDecorations(this.prevSelectedDecoratorID, [
             {
               range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
               options: {
@@ -363,9 +313,60 @@ class Editor extends React.PureComponent<Props> {
             },
           ]);
 
-          this.editor.revealLineInCenter(range['startLine'] + 1);
+          if (this.props.highlight.source !== 'editor') this.editor.revealLineInCenter(range['startLine'] + 1);
           break;
         }
+      }
+    }
+  }
+
+  updateHover() {
+    if (!this.props.hover) {
+      return;
+    }
+    // check what the target should be from paths or ids
+    let target: string;
+    if (!this.props.hover.target) {
+      if (this.props.hover.paths.length == 1) target = this.props.hover.paths[0];
+      if (this.props.hover.ids.length == 1) {
+        const target_id = this.props.hover.ids[0];
+        for (const [key, ids] of Object.entries(this.props.view['mapping'] as Record<string, (number | string)[]>)) {
+          if (ids.includes(target_id) || (!target_id.includes(':') && ids.includes(parseInt(target_id)))) {
+            target = key;
+          }
+        }
+      }
+    }
+    if (this.props.hover.selected) {
+      this.prevHoverDecoratorID = this.editor.deltaDecorations(this.prevHoverDecoratorID, [
+        {
+          range: new Monaco.Range(this.props.hover.selected.startLine + 1, 1, this.props.hover.selected.endLine + 2, 1),
+          options: {
+            isWholeLine: false,
+            className: 'hoveredLines',
+          },
+        },
+      ]);
+      return;
+    }
+    for (const range of Object.values(this.props.ranges)) {
+      const path_str = range['path'].reduce((prev: string, curr: undefined) => {
+        if (typeof curr === 'string') return prev + `["${curr}"]`;
+        return prev + `[${curr}]`;
+      }, '');
+      if (path_str === this.props.hover.target || path_str === target) {
+        this.prevHoverDecoratorID = this.editor.deltaDecorations(this.prevHoverDecoratorID, [
+          {
+            range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
+            options: {
+              isWholeLine: false,
+              className: 'hoveredLines',
+            },
+          },
+        ]);
+
+        if (this.props.hover.source !== 'editor') this.editor.revealLineInCenter(range['startLine'] + 1);
+        break;
       }
     }
   }

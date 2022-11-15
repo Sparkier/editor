@@ -178,8 +178,13 @@ export function CreateFlameChart({
         return result.replace(/"|\]/g, ''); // replace all " and ] characters
       };
 
-      const deriveId = (id: string) => {
+      const deriveId = (d: any) => {
         // derive an id if it is multi-leveled (e.g. "[foo][bar]" => "foo -> bar")
+        let id = `${d.id}`;
+        if (!isNaN(+id) && d.parent) {
+          // if it is a number, add the parent for more information
+          id = `${d.parent}[${id}`;
+        }
         const result = `${id}`.replace(/\]\[/g, ' -> ');
         return result.replace(/]|\[|"/g, '');
       };
@@ -270,9 +275,7 @@ export function CreateFlameChart({
 
       cell
         .append('title')
-        .text(
-          (d: any) => `${deriveId(d.data.id)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`
-        );
+        .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
     }
   }, [chartRef.current, tree_data]);
 

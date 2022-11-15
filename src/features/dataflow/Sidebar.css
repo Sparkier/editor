@@ -53,3 +53,9 @@
 .type-filter {
   flex-shrink: 0;
 }
+
+.pulses-container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}

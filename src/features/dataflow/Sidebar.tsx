@@ -46,21 +46,23 @@ export function Pulses() {
   return (
     <fieldset>
       <legend>Filter by pulse</legend>
-      <p>
-        Clicking on a pulse filters the nodes to those that were updated in that pulse and displays their values on
-        hover.
-      </p>
-      <PulsesButtons />
-      <table className="editor-table">
-        <thead>
-          <tr>
-            <th>Clock</th>
-            <th>Touched</th>
-            <th>Time(ms)</th>
-          </tr>
-        </thead>
-        <PulsesRows />
-      </table>
+      <div className="pulses-container">
+        <p>
+          Clicking on a pulse filters the nodes to those that were updated in that pulse and displays their values on
+          hover.
+        </p>
+        <PulsesButtons />
+        <table className="editor-table">
+          <thead>
+            <tr>
+              <th>Clock</th>
+              <th>Touched</th>
+              <th>Time(ms)</th>
+            </tr>
+          </thead>
+          <PulsesRows />
+        </table>
+      </div>
     </fieldset>
   );
 }
@@ -83,7 +85,6 @@ function PulsesButtons() {
 
 function PulsesRows() {
   const pulses = useAppSelector(sortedPulsesSelector);
-  console.log(pulses, 'side');
   const selectedPulse = useAppSelector(selectedPulseSelector);
   return (
     <tbody>

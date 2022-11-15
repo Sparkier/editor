@@ -172,11 +172,23 @@ export function CreateFlameChart({
         return d.x1 - d.x0 - Math.min(1, (d.x1 - d.x0) / 2);
       };
 
+      const stripId = (id: string) => {
+        // strip the id so that we don't have awkward-looking strings here
+        const result = `${id}`.replace(/^(.*[[])/, ''); // remove all up to last [
+        return result.replace(/"|\]/g, ''); // replace all " and ] characters
+      };
+
+      const deriveId = (id: string) => {
+        // derive an id if it is multi-leveled (e.g. "[foo][bar]" => "foo -> bar")
+        const result = `${id}`.replace(/\]\[/g, ' -> ');
+        return result.replace(/]|\[|"/g, '');
+      };
+
       const labelVisible = (d) => {
         return (
           d.y1 <= height &&
           d.x0 >= 0 &&
-          (d.x1 - d.x0 > 50 || (d.x1 - d.x0 > 20 && (d.data ? `${d.data.id}` : `${d.id}`).length < 10))
+          (d.x1 - d.x0 > 50 || (d.x1 - d.x0 > 20 && (d.data ? `${d.data.id}` : stripId(d.id)).length < 10))
         );
       };
 
@@ -247,7 +259,7 @@ export function CreateFlameChart({
         .append('tspan')
         .attr('x', 0)
         .attr('dy', '0em')
-        .text((d: any) => d.data.id);
+        .text((d: any) => stripId(d.data.id));
       text
         .append('tspan')
         .attr('x', 0)
@@ -258,7 +270,9 @@ export function CreateFlameChart({
 
       cell
         .append('title')
-        .text((d: any) => `${d.data.id}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
+        .text(
+          (d: any) => `${deriveId(d.data.id)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`
+        );
     }
   }, [chartRef.current, tree_data]);
 

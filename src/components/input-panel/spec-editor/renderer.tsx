@@ -52,15 +52,7 @@ class Editor extends React.PureComponent<Props> {
     this.props.setHighlight(this.props.hover);
     const range = this.props.highlight?.selected;
     if (range) {
-      this.prevSelectedDecoratorID = this.editor.deltaDecorations(this.prevSelectedDecoratorID, [
-        {
-          range: new Monaco.Range(range.startLine + 1, 1, range.endLine + 1, 1),
-          options: {
-            isWholeLine: true,
-            className: 'selectedLines',
-          },
-        },
-      ]);
+      this.prevSelectedDecoratorID = this.decorateRange(this.prevSelectedDecoratorID, range, 'selectedLines');
     } else {
       this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
     }
@@ -303,16 +295,7 @@ class Editor extends React.PureComponent<Props> {
           })
           .join('');
         if (path_str === this.props.highlight.target) {
-          this.prevSelectedDecoratorID = this.editor.deltaDecorations(this.prevSelectedDecoratorID, [
-            {
-              range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
-              options: {
-                isWholeLine: true,
-                className: 'selectedLines',
-              },
-            },
-          ]);
-
+          this.prevSelectedDecoratorID = this.decorateRange(this.prevSelectedDecoratorID, range, 'selectedLines');
           if (this.props.highlight.source !== 'editor') this.editor.revealLineInCenter(range['startLine'] + 1);
           break;
         }
@@ -338,15 +321,11 @@ class Editor extends React.PureComponent<Props> {
       }
     }
     if (this.props.hover.selected) {
-      this.prevHoverDecoratorID = this.editor.deltaDecorations(this.prevHoverDecoratorID, [
-        {
-          range: new Monaco.Range(this.props.hover.selected.startLine + 1, 1, this.props.hover.selected.endLine + 2, 1),
-          options: {
-            isWholeLine: false,
-            className: 'hoveredLines',
-          },
-        },
-      ]);
+      this.prevHoverDecoratorID = this.decorateRange(
+        this.prevHoverDecoratorID,
+        {startLine: this.props.hover.selected.startLine, endLine: this.props.hover.selected.endLine},
+        'hoveredLines'
+      );
       return;
     }
     for (const range of Object.values(this.props.ranges)) {
@@ -355,20 +334,24 @@ class Editor extends React.PureComponent<Props> {
         return prev + `[${curr}]`;
       }, '');
       if (path_str === this.props.hover.target || path_str === target) {
-        this.prevHoverDecoratorID = this.editor.deltaDecorations(this.prevHoverDecoratorID, [
-          {
-            range: new Monaco.Range(range['startLine'] + 1, 1, range['endLine'] + 2, 1),
-            options: {
-              isWholeLine: false,
-              className: 'hoveredLines',
-            },
-          },
-        ]);
-
+        this.prevHoverDecoratorID = this.decorateRange(this.prevHoverDecoratorID, range, 'hoveredLines');
         if (this.props.hover.source !== 'editor') this.editor.revealLineInCenter(range['startLine'] + 1);
         break;
       }
     }
+  }
+
+  decorateRange(decoratorID: string[], range: {startLine: number; endLine: number}, className: string): string[] {
+    const endAdd = range.endLine === range.startLine ? 1 : 2;
+    return this.editor.deltaDecorations(decoratorID, [
+      {
+        range: new Monaco.Range(range.startLine + 1, 1, range.endLine + endAdd, 1),
+        options: {
+          isWholeLine: true,
+          className: className,
+        },
+      },
+    ]);
   }
 
   public componentDidMount() {

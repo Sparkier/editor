@@ -215,32 +215,6 @@ export function CreateFlameChart({
         dispatch(setHighlight(hoverRef.current));
       };
 
-      // const dblclick = () => {
-      //   focus = data;
-
-      //   // const t = cell
-      //   const t = svg
-      //     .selectAll('g')
-      //     .transition()
-      //     .duration(750)
-      //     .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
-
-      //   svg
-      //     .selectAll('rect')
-      //     .transition(t)
-      //     .attr('width', (d: any) => rectWidth(d));
-      //   svg
-      //     .selectAll('text')
-      //     .transition(t)
-      //     .attr('fill-opacity', (d: any) => +labelVisible(d));
-      //   svg
-      //     .selectAll('tspan')
-      //     .transition(t)
-      //     .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
-
-      //   dispatch(setHighlight(null));
-      // };
-
       const deriveId = (d: any) => {
         // derive an id if it is multi-leveled (e.g. "[foo][bar]" => "foo -> bar")
         let id = `${d.id}`;

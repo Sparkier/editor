@@ -180,6 +180,32 @@ export function CreateFlameChart({
     }
   };
 
+  const dblclick = () => {
+    focus = data;
+
+    // const t = cell
+    const t = svg
+      .selectAll('g')
+      .transition()
+      .duration(750)
+      .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
+
+    svg
+      .selectAll('rect')
+      .transition(t)
+      .attr('width', (d: any) => rectWidth(d));
+    svg
+      .selectAll('text')
+      .transition(t)
+      .attr('fill-opacity', (d: any) => +labelVisible(d));
+    svg
+      .selectAll('tspan')
+      .transition(t)
+      .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+
+    dispatch(setHighlight(null));
+  };
+
   React.useEffect(() => {
     if (parents.length != 0) {
       const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, parents.length + 1));
@@ -189,31 +215,31 @@ export function CreateFlameChart({
         dispatch(setHighlight(hoverRef.current));
       };
 
-      const dblclick = () => {
-        focus = data;
+      // const dblclick = () => {
+      //   focus = data;
 
-        // const t = cell
-        const t = svg
-          .selectAll('g')
-          .transition()
-          .duration(750)
-          .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
+      //   // const t = cell
+      //   const t = svg
+      //     .selectAll('g')
+      //     .transition()
+      //     .duration(750)
+      //     .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
 
-        svg
-          .selectAll('rect')
-          .transition(t)
-          .attr('width', (d: any) => rectWidth(d));
-        svg
-          .selectAll('text')
-          .transition(t)
-          .attr('fill-opacity', (d: any) => +labelVisible(d));
-        svg
-          .selectAll('tspan')
-          .transition(t)
-          .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+      //   svg
+      //     .selectAll('rect')
+      //     .transition(t)
+      //     .attr('width', (d: any) => rectWidth(d));
+      //   svg
+      //     .selectAll('text')
+      //     .transition(t)
+      //     .attr('fill-opacity', (d: any) => +labelVisible(d));
+      //   svg
+      //     .selectAll('tspan')
+      //     .transition(t)
+      //     .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
-        dispatch(setHighlight(null));
-      };
+      //   dispatch(setHighlight(null));
+      // };
 
       const deriveId = (d: any) => {
         // derive an id if it is multi-leveled (e.g. "[foo][bar]" => "foo -> bar")
@@ -350,6 +376,7 @@ export function CreateFlameChart({
     } else {
       d3.select(chartRef.current).selectAll('rect').attr('fill-opacity', 0.6);
       dispatch(setHighlight(null));
+      dblclick();
     }
   }, [chartRef.current, highlight]);
 

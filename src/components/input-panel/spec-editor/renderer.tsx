@@ -55,6 +55,7 @@ class Editor extends React.PureComponent<Props> {
       this.prevSelectedDecoratorID = this.decorateRange(this.prevSelectedDecoratorID, range, 'selectedLines');
     } else {
       this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
+      this.props.setHighlight(null);
     }
   }
 

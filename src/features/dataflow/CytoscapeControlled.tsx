@@ -206,6 +206,8 @@ export function CytoscapeControlled({
         cy.elements(`node[id = "${id}"]`).classes('highlightNodes');
       });
       if (highlight.target) onSelect({nodes: highlight.ids, edges: []});
+    } else {
+      onSelect(null);
     }
   }, [cyRef.current, highlight]);
 

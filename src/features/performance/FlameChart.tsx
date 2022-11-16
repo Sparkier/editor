@@ -120,62 +120,99 @@ export function CreateFlameChart({
     return null;
   }, [flameInput]);
 
+  const data = React.useMemo(() => {
+    if (tree_data) return partition(tree_data);
+    return null;
+  }, [tree_data]);
+
+  const labelVisible = (d) => {
+    return (
+      d.y1 <= height &&
+      d.x0 >= 0 &&
+      (d.x1 - d.x0 > 50 || (d.x1 - d.x0 > 20 && (d.data ? `${d.data.id}` : stripId(d.id)).length < 10))
+    );
+  };
+  const rectWidth = (d) => {
+    return d.x1 - d.x0 - Math.min(1, (d.x1 - d.x0) / 2);
+  };
+
+  const stripId = (id: string) => {
+    // strip the id so that we don't have awkward-looking strings here
+    const result = `${id}`.replace(/^(.*[[])/, ''); // remove all up to last [
+    return result.replace(/"|\]/g, ''); // replace all " and ] characters
+  };
+
+  let focus = data;
+
+  const zoom = (p) => {
+    if (p.depth != 0) {
+      focus = focus === p ? (p = p.parent) : p;
+
+      data.each(
+        (d: any) =>
+          (d.target = {
+            x0: ((d.x0 - p.x0) / (p.x1 - p.x0)) * width,
+            x1: ((d.x1 - p.x0) / (p.x1 - p.x0)) * width,
+            y0: d.y0 - p.y0,
+            y1: d.y1 - p.y0,
+          })
+      );
+
+      const t = d3
+        .select(chartRef.current)
+        .selectAll('g')
+        .transition()
+        .duration(750)
+        .attr('transform', (d: any) => `translate(${d.target.x0},${d.target.y0})`);
+
+      svg
+        .selectAll('rect')
+        .transition(t)
+        .attr('width', (d: any) => rectWidth(d.target));
+      svg
+        .selectAll('text')
+        .transition(t)
+        .attr('fill-opacity', (d: any) => +labelVisible(d.target));
+      svg
+        .selectAll('tspan')
+        .transition(t)
+        .attr('fill-opacity', (d: any) => (labelVisible(d.target) as any) * 0.7);
+    }
+  };
+
   React.useEffect(() => {
-    if (tree_data && parents.length != 0) {
-      const data = partition(tree_data);
-      let focus = data;
+    if (parents.length != 0) {
       const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, parents.length + 1));
 
       const clicked = (event, p) => {
-        if (p.depth != 0) {
-          focus = focus === p ? (p = p.parent) : p;
-
-          data.each(
-            (d: any) =>
-              (d.target = {
-                x0: ((d.x0 - p.x0) / (p.x1 - p.x0)) * width,
-                x1: ((d.x1 - p.x0) / (p.x1 - p.x0)) * width,
-                y0: d.y0 - p.y0,
-                y1: d.y1 - p.y0,
-              })
-          );
-
-          const t = cell
-            .transition()
-            .duration(750)
-            .attr('transform', (d: any) => `translate(${d.target.x0},${d.target.y0})`);
-
-          rect.transition(t).attr('width', (d: any) => rectWidth(d.target));
-          text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d.target));
-          tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d.target) as any) * 0.7);
-        }
-
+        zoom(p);
         dispatch(setHighlight(hoverRef.current));
       };
 
       const dblclick = () => {
         focus = data;
 
-        const t = cell
+        // const t = cell
+        const t = svg
+          .selectAll('g')
           .transition()
           .duration(750)
           .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
 
-        rect.transition(t).attr('width', (d: any) => rectWidth(d));
-        text.transition(t).attr('fill-opacity', (d: any) => +labelVisible(d));
-        tspan.transition(t).attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+        svg
+          .selectAll('rect')
+          .transition(t)
+          .attr('width', (d: any) => rectWidth(d));
+        svg
+          .selectAll('text')
+          .transition(t)
+          .attr('fill-opacity', (d: any) => +labelVisible(d));
+        svg
+          .selectAll('tspan')
+          .transition(t)
+          .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
         dispatch(setHighlight(null));
-      };
-
-      const rectWidth = (d) => {
-        return d.x1 - d.x0 - Math.min(1, (d.x1 - d.x0) / 2);
-      };
-
-      const stripId = (id: string) => {
-        // strip the id so that we don't have awkward-looking strings here
-        const result = `${id}`.replace(/^(.*[[])/, ''); // remove all up to last [
-        return result.replace(/"|\]/g, ''); // replace all " and ] characters
       };
 
       const deriveId = (d: any) => {
@@ -187,14 +224,6 @@ export function CreateFlameChart({
         }
         const result = `${id}`.replace(/\]\[/g, ' -> ');
         return result.replace(/]|\[|"/g, '');
-      };
-
-      const labelVisible = (d) => {
-        return (
-          d.y1 <= height &&
-          d.x0 >= 0 &&
-          (d.x1 - d.x0 > 50 || (d.x1 - d.x0 > 20 && (d.data ? `${d.data.id}` : stripId(d.id)).length < 10))
-        );
       };
 
       const onHover = (d, i) => {
@@ -271,13 +300,13 @@ export function CreateFlameChart({
         .attr('dy', '1em')
         .text((d: any) => `${format(d.data.time !== undefined ? d.data.time : d.value)}`);
 
-      const tspan = text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+      text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
       cell
         .append('title')
         .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
     }
-  }, [chartRef.current, tree_data]);
+  }, [chartRef.current, data]);
 
   React.useEffect(() => {
     const values = [];
@@ -314,13 +343,15 @@ export function CreateFlameChart({
         .selectAll('rect')
         .attr('fill-opacity', (d: any) => {
           if (!d.depth) return 0.1;
+          // zoom in
+          if (highlight.target == d.data.id) zoom(d);
           return values.includes(d.data.id) || values.includes(d.data.parent) ? 0.8 : 0.1;
         });
     } else {
       d3.select(chartRef.current).selectAll('rect').attr('fill-opacity', 0.6);
       dispatch(setHighlight(null));
     }
-  }, [highlight]);
+  }, [chartRef.current, highlight]);
 
   const renderer = (
     <div style={{backgroundColor: 'white'}}>

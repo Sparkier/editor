@@ -66,7 +66,7 @@ export type Graph = {
   edges: Record<ID, Edge>;
 };
 
-// Filters a graphs edges to only include thos related to the selected nodes
+// Filters a graphs edges to only include those related to the selected nodes
 export function filterEdges(graph: Graph, nodes: Set<ID>): Set<ID> {
   return new Set(
     Object.entries(graph.edges)

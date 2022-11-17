@@ -49,18 +49,14 @@ export const style: cytoscape.Stylesheet[] = [
     selector: '.highlightNodes',
     style: {
       'border-color': '#0066cc',
-      'underlay-color': '#0066cc',
-      'underlay-opacity': 0.38,
-      'border-width': '5',
+      'border-width': '8',
     },
   },
   {
     selector: '.hoverNodes',
     style: {
-      'border-color': '#0066cc',
       'underlay-color': '#0066cc',
-      'underlay-opacity': 0.13,
-      'border-width': '5',
+      'underlay-opacity': 0.5,
     },
   },
   {
@@ -68,12 +64,6 @@ export const style: cytoscape.Stylesheet[] = [
     style: {
       'text-valign': 'top',
       'background-opacity': 0.05,
-    },
-  },
-  {
-    selector: ':selected',
-    style: {
-      'overlay-opacity': 0.25,
     },
   },
   {

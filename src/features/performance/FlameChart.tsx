@@ -100,7 +100,23 @@ export function CreateFlameChart({
   const height = 200;
 
   const partition = (data) => {
-    const root = d3.hierarchy(data).sum((d: any) => d.time);
+    // to calculate the sum of time by post-order traversal
+    // reference: https://github.com/d3/d3-hierarchy#node_sum
+    function sum_time(value) {
+      return root.eachAfter(function (node) {
+        let sum = +value(node.data) || 0;
+        const children = node.children;
+        let i = children && children.length;
+        while (--i >= 0) sum += children[i]['time'];
+        node['time'] = sum;
+      });
+    }
+
+    // because we want to display nodes with time = 0,
+    // d.value is for calculate rect coordinates
+    // d.time is the actual time
+    const root = d3.hierarchy(data).sum((d: any) => d.value);
+    sum_time((d) => d['time']);
     return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
   };
 
@@ -298,15 +314,11 @@ export function CreateFlameChart({
         .append('tspan')
         .attr('x', 0)
         .attr('dy', '1em')
-        // .text((d: any) => `${format(d.data.time !== undefined ? d.data.time : d.value)}`);
-        .text((d: any) => `${format(d.time !== undefined ? d.time : d.value)}`);
+        .text((d: any) => `${format(d.time)}`);
 
       text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
-      cell
-        .append('title')
-        // .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
-        .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.time !== undefined ? d.time : d.value)} ms`);
+      cell.append('title').text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.time)} ms`);
     }
   }, [chartRef.current, data]);
 

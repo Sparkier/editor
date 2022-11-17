@@ -57,7 +57,7 @@ export function Flame() {
               flameInput.push({
                 id: op,
                 parent: path_str,
-                time: selectedValues[op]['value'].time,
+                time: selectedValues[op]['value'].time ? selectedValues[op]['value'].time : 0,
                 value: selectedValues[op]['value'].time + 0.01,
               });
             }
@@ -66,7 +66,7 @@ export function Flame() {
               flameInput.push({
                 id: op,
                 parent: path_str,
-                time: pulse_1.values[op]['value'].time,
+                time: pulse_1.values[op]['value'].time ? pulse_1.values[op]['value'].time : 0,
                 value: pulse_1.values[op]['value'].time + 0.01,
               });
             }
@@ -100,7 +100,7 @@ export function CreateFlameChart({
   const height = 200;
 
   const partition = (data) => {
-    const root = d3.hierarchy(data).sum((d: any) => d.value);
+    const root = d3.hierarchy(data).sum((d: any) => d.time);
     return d3.partition().size([width, ((root.height + 1) * height) / (root.height + 1)])(root);
   };
 
@@ -298,13 +298,15 @@ export function CreateFlameChart({
         .append('tspan')
         .attr('x', 0)
         .attr('dy', '1em')
-        .text((d: any) => `${format(d.data.time !== undefined ? d.data.time : d.value)}`);
+        // .text((d: any) => `${format(d.data.time !== undefined ? d.data.time : d.value)}`);
+        .text((d: any) => `${format(d.time !== undefined ? d.time : d.value)}`);
 
       text.append('tspan').attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
 
       cell
         .append('title')
-        .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
+        // .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.data.time !== undefined ? d.data.time : d.value)} ms`);
+        .text((d: any) => `${deriveId(d.data)}\ntime: ${format(d.time !== undefined ? d.time : d.value)} ms`);
     }
   }, [chartRef.current, data]);
 

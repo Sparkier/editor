@@ -64,6 +64,13 @@ export const style: cytoscape.Stylesheet[] = [
     },
   },
   {
+    selector: '.littleRuntimeNodes',
+    style: {
+      'background-opacity': 0.1,
+      'text-opacity': 0.5,
+    },
+  },
+  {
     selector: ':parent',
     style: {
       'text-valign': 'top',

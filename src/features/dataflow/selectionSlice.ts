@@ -56,6 +56,19 @@ export const selectedValuesSelector = createSelector(pulsesSelector, selectedPul
   selected === null ? null : pulses.find((p) => p.clock === selected).values
 );
 
+export const littleRuntimeSelector = createSelector(
+  pulsesSelector,
+  selectedPulseSelector,
+  (pulses, selected) =>
+    new Set(
+      !selected || !pulses || !pulses.length
+        ? null
+        : Object.entries(pulses.find((p) => (p.clock === selected ? selected : 1))?.values)
+            .filter(([id, value]) => value['value'] && value['value']['time'] == '0')
+            .map(([id]) => id)
+    )
+);
+
 // The nodes that are filtered based on the selector pulse
 export const visibleNodesFromPulseSelector = createSelector(graphSelector, selectedValuesSelector, (graph, values) =>
   values === null || graph === null ? null : associatedWith(graph, Object.keys(values))

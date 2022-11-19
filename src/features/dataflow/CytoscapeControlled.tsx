@@ -32,6 +32,7 @@ export function CytoscapeControlled({
   highlight,
   hoverByFlame,
   perfHover,
+  littleRuntime,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -42,6 +43,7 @@ export function CytoscapeControlled({
   highlight: Highlight | null;
   hoverByFlame: Hover | null;
   perfHover;
+  littleRuntime: Set<string> | null;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
@@ -221,6 +223,17 @@ export function CytoscapeControlled({
       });
     }
   }, [cyRef.current, hoverByFlame]);
+
+  React.useEffect(() => {
+    const cy = cyRef.current;
+    cy.nodes('node').removeClass('littleRuntimeNodes');
+
+    if (littleRuntime) {
+      littleRuntime.forEach((id) => {
+        cy.elements(`node[id = "${id}"]`).addClass('littleRuntimeNodes');
+      });
+    }
+  }, [cyRef.current, littleRuntime]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

@@ -49,8 +49,8 @@ export function Graph() {
   const cytoscape = React.useMemo(() => <Cytoscape />, []);
   return (
     <div className="chart">
-      <Popup />
       {cytoscape}
+      <Popup />
     </div>
   );
 }

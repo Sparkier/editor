@@ -1,4 +1,4 @@
-import cytoscape, {CytoscapeOptions} from 'cytoscape';
+import cytoscape, {CytoscapeOptions, Stylesheet} from 'cytoscape';
 import * as React from 'react';
 import {Elements} from './utils/allRelated';
 import popper from 'cytoscape-popper';
@@ -8,15 +8,18 @@ import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
 import {Hover} from './hoverSlice';
+import {Values} from './pulsesSlice';
 
 cytoscape.use(popper);
 
 // https://js.cytoscape.org/#core/initialisation
-const OPTIONS: CytoscapeOptions = {
-  style,
-  // Make zoom more constrained than default so we don't get lost
-  minZoom: 1e-2,
-  maxZoom: 1e1,
+const OPTIONS = (values: Values | null): CytoscapeOptions => {
+  return {
+    style: style(values), // (values),
+    // Make zoom more constrained than default so we don't get lost
+    minZoom: 1e-2,
+    maxZoom: 1e1,
+  };
 };
 
 /**
@@ -33,6 +36,7 @@ export function CytoscapeControlled({
   hoverByFlame,
   perfHover,
   littleRuntime,
+  values,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -44,6 +48,7 @@ export function CytoscapeControlled({
   hoverByFlame: Hover | null;
   perfHover;
   littleRuntime: Set<string> | null;
+  values: Values;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
@@ -55,7 +60,7 @@ export function CytoscapeControlled({
 
   // Set cytoscape ref in first effect and set up callbacks
   React.useEffect(() => {
-    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS}));
+    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values)}));
     layoutRef.current = cy.makeLayout({name: 'preset'});
     removedRef.current = null;
     cy.on('select', (event) => {
@@ -234,6 +239,11 @@ export function CytoscapeControlled({
       });
     }
   }, [cyRef.current, littleRuntime]);
+
+  React.useEffect(() => {
+    const cy = cyRef.current;
+    cy.style(style(values));
+  }, [cyRef.current, values]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

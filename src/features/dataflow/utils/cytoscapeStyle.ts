@@ -12,20 +12,28 @@ export const fontFamily = '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, 
 export const fontSize = '16px';
 export const nodePaddingPx = 8;
 
-export const style = (values: Values | null, coloringMode: string): cytoscape.Stylesheet[] => {
+export const style = (
+  values: Values | null,
+  coloringMode: string,
+  timeRange: {min: number; max: number}
+): cytoscape.Stylesheet[] => {
   let colors: {selector: string; style: {'background-color': string; 'background-opacity'?: number}}[] = [];
   if (values && coloringMode === 'time') {
-    const time = Object.entries(values).map((v) => {
-      return v[1]['value'].time as number;
-    });
-    const max = Math.max(...time);
-
     colors = Object.entries(values).map((key) => {
+      const currentTime: number = key[1]['value'].time as number;
+      if (currentTime > timeRange.max || currentTime < timeRange.min) {
+        return {
+          selector: `node[id="${key[0]}"]`,
+          style: {
+            'background-color': 'grey',
+          }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
+        };
+      }
       return {
         selector: `node[id="${key[0]}"]`,
         style: {
           'background-color': 'red',
-          'background-opacity': 0.05 + (key[1]['value'].time / max) * 0.7,
+          'background-opacity': 0.05 + ((key[1]['value'].time - timeRange.min) / (timeRange.max - timeRange.min)) * 0.7,
         }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
       };
     });

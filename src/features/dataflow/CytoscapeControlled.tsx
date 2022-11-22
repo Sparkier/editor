@@ -13,9 +13,13 @@ import {Values} from './pulsesSlice';
 cytoscape.use(popper);
 
 // https://js.cytoscape.org/#core/initialisation
-const OPTIONS = (values: Values | null, coloringMode: string): CytoscapeOptions => {
+const OPTIONS = (
+  values: Values | null,
+  coloringMode: string,
+  timeRange: {min: number; max: number}
+): CytoscapeOptions => {
   return {
-    style: style(values, coloringMode), // (values),
+    style: style(values, coloringMode, timeRange), // (values),
     // Make zoom more constrained than default so we don't get lost
     minZoom: 1e-2,
     maxZoom: 1e1,
@@ -37,6 +41,7 @@ export function CytoscapeControlled({
   perfHover,
   values,
   coloringMode,
+  timeRange,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -49,6 +54,7 @@ export function CytoscapeControlled({
   perfHover;
   values: Values;
   coloringMode: string;
+  timeRange: {min: number; max: number};
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
@@ -60,7 +66,7 @@ export function CytoscapeControlled({
 
   // Set cytoscape ref in first effect and set up callbacks
   React.useEffect(() => {
-    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values, coloringMode)}));
+    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values, coloringMode, timeRange)}));
     layoutRef.current = cy.makeLayout({name: 'preset'});
     removedRef.current = null;
     cy.on('select', (event) => {
@@ -231,8 +237,8 @@ export function CytoscapeControlled({
 
   React.useEffect(() => {
     const cy = cyRef.current;
-    cy.style(style(values, coloringMode));
-  }, [cyRef.current, values, coloringMode]);
+    cy.style(style(values, coloringMode, timeRange));
+  }, [cyRef.current, values, coloringMode, timeRange]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

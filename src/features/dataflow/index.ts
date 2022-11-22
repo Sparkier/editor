@@ -1,3 +1,4 @@
+import {timingRangeSlice} from './rangeSlice';
 import {coloringSlice} from './colorSlice';
 import {AnyAction} from '@reduxjs/toolkit';
 import {State} from '../../constants/default-state';
@@ -23,6 +24,7 @@ const slices = [
   highlightSlice,
   hoverSlice,
   coloringSlice,
+  timingRangeSlice,
 ] as const;
 type SliceType = typeof slices[number];
 /**

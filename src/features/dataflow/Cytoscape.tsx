@@ -2,12 +2,7 @@ import * as React from 'react';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from '../../hooks';
 import {currentPositionsSelector} from './layoutSlice';
-import {
-  selectedElementsSelector,
-  setSelectedElements,
-  littleRuntimeSelector,
-  selectedValuesSelector,
-} from './selectionSlice';
+import {selectedElementsSelector, setSelectedElements, selectedValuesSelector} from './selectionSlice';
 import {setPopup} from './popupSlice';
 import {CytoscapeControlled} from './CytoscapeControlled';
 import {cytoscapeElementsSelector} from './runtimeSlice';
@@ -21,7 +16,6 @@ export function Cytoscape() {
   const positions = useAppSelector(currentPositionsSelector);
   const selected = useAppSelector(selectedElementsSelector);
   const highlight = useAppSelector(selectedHighlightSelector);
-  const littleRuntime = useAppSelector(littleRuntimeSelector);
   const values = useAppSelector(selectedValuesSelector);
 
   const onSelect = React.useCallback((el) => dispatch(setSelectedElements(el)), [dispatch]);
@@ -40,7 +34,6 @@ export function Cytoscape() {
       highlight={highlight}
       hoverByFlame={hover}
       perfHover={perfHover}
-      littleRuntime={littleRuntime}
       values={values}
     />
   );

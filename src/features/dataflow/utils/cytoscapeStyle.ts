@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import {Values} from './../pulsesSlice';
 import {scheme} from 'vega-scale';
 import {colorKeys} from './graph';
@@ -5,7 +6,6 @@ import {colorKeys} from './graph';
 // Use these color schemes for the nodes
 // https://vega.github.io/vega/docs/schemes/#categorical
 const colorScheme: string[] = [...scheme('tableau20'), ...scheme('category20b')];
-
 // Copy --base-font-family but remove BlinkMacSystemFont because of Chrome bug that cytoscape hits
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1056386#c12
 
@@ -14,7 +14,7 @@ export const fontSize = '16px';
 export const nodePaddingPx = 8;
 
 export const style = (values: Values | null): cytoscape.Stylesheet[] => {
-  let colors;
+  let colors: {selector: string; style: {'background-color': string}}[] = [];
   if (values) {
     const time = Object.entries(values).map((v) => {
       return v[1]['value'].time as number;
@@ -27,8 +27,8 @@ export const style = (values: Values | null): cytoscape.Stylesheet[] => {
         selector: `node[id="${key[0]}"]`,
         style: {
           'background-color': 'red',
-          'background-opacity': 0.05 + (key[1]['value'].time / max) * 0.95,
-        }, // Color scale based on key[1].value.time
+          'background-opacity': 0.05 + (key[1]['value'].time / max) * 0.7,
+        }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
       };
     });
   } else {
@@ -37,7 +37,6 @@ export const style = (values: Values | null): cytoscape.Stylesheet[] => {
       style: {'background-color': colorScheme[i % colorScheme.length]},
     }));
   }
-
   return [
     {
       selector: 'node, edge',

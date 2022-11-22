@@ -224,7 +224,7 @@ export function CreateFlameChart({
 
   React.useEffect(() => {
     if (parents.length != 0) {
-      const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, parents.length + 1));
+      const color = d3.scaleOrdinal(d3.quantize(d3.scaleSequential(['grey', '#007bff']), parents.length + 1));
 
       const clicked = (event, p) => {
         zoom(p);

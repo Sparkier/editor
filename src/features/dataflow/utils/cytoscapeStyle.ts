@@ -14,19 +14,30 @@ export const fontSize = '16px';
 export const nodePaddingPx = 8;
 
 export const style = (values: Values | null): cytoscape.Stylesheet[] => {
-  const colors =
-    values === null
-      ? colorKeys.map((t, i) => ({
-          selector: `node[colorKey=${JSON.stringify(t)}]`,
-          style: {'background-color': colorScheme[i % colorScheme.length]},
-        }))
-      : Object.entries(values).map((key) => {
-          console.log(key);
-          return {
-            selector: `node[id="${key[0]}"]`,
-            style: {'background-color': 'red'}, // Color scale based on key[1].value.time
-          };
-        });
+  let colors;
+  if (values) {
+    const time = Object.entries(values).map((v) => {
+      return v[1]['value'].time as number;
+    });
+    const max = Math.max(...time);
+
+    colors = Object.entries(values).map((key) => {
+      console.log(key);
+      return {
+        selector: `node[id="${key[0]}"]`,
+        style: {
+          'background-color': 'red',
+          'background-opacity': 0.05 + (key[1]['value'].time / max) * 0.95,
+        }, // Color scale based on key[1].value.time
+      };
+    });
+  } else {
+    colors = colorKeys.map((t, i) => ({
+      selector: `node[colorKey=${JSON.stringify(t)}]`,
+      style: {'background-color': colorScheme[i % colorScheme.length]},
+    }));
+  }
+
   return [
     {
       selector: 'node, edge',

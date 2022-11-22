@@ -1,4 +1,4 @@
-import cytoscape, {CytoscapeOptions} from 'cytoscape';
+import cytoscape, {CytoscapeOptions, Stylesheet} from 'cytoscape';
 import * as React from 'react';
 import {Elements} from './utils/allRelated';
 import popper from 'cytoscape-popper';

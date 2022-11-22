@@ -1,3 +1,4 @@
+import {coloringSlice} from './colorSlice';
 import {AnyAction} from '@reduxjs/toolkit';
 import {State} from '../../constants/default-state';
 
@@ -21,6 +22,7 @@ const slices = [
   popupSlice,
   highlightSlice,
   hoverSlice,
+  coloringSlice,
 ] as const;
 type SliceType = typeof slices[number];
 /**

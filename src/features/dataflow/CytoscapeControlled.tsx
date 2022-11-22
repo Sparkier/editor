@@ -8,15 +8,18 @@ import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
 import {Hover} from './hoverSlice';
+import {Values} from './pulsesSlice';
 
 cytoscape.use(popper);
 
 // https://js.cytoscape.org/#core/initialisation
-const OPTIONS: CytoscapeOptions = {
-  style,
-  // Make zoom more constrained than default so we don't get lost
-  minZoom: 1e-2,
-  maxZoom: 1e1,
+const OPTIONS = (values: Values | null, coloringMode: string): CytoscapeOptions => {
+  return {
+    style: style(values, coloringMode), // (values),
+    // Make zoom more constrained than default so we don't get lost
+    minZoom: 1e-2,
+    maxZoom: 1e1,
+  };
 };
 
 /**
@@ -32,7 +35,8 @@ export function CytoscapeControlled({
   highlight,
   hoverByFlame,
   perfHover,
-  littleRuntime,
+  values,
+  coloringMode,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -43,7 +47,8 @@ export function CytoscapeControlled({
   highlight: Highlight | null;
   hoverByFlame: Hover | null;
   perfHover;
-  littleRuntime: Set<string> | null;
+  values: Values;
+  coloringMode: string;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
@@ -55,7 +60,7 @@ export function CytoscapeControlled({
 
   // Set cytoscape ref in first effect and set up callbacks
   React.useEffect(() => {
-    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS}));
+    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values, coloringMode)}));
     layoutRef.current = cy.makeLayout({name: 'preset'});
     removedRef.current = null;
     cy.on('select', (event) => {
@@ -226,14 +231,8 @@ export function CytoscapeControlled({
 
   React.useEffect(() => {
     const cy = cyRef.current;
-    cy.nodes('node').removeClass('littleRuntimeNodes');
-
-    if (littleRuntime) {
-      littleRuntime.forEach((id) => {
-        cy.elements(`node[id = "${id}"]`).addClass('littleRuntimeNodes');
-      });
-    }
-  }, [cyRef.current, littleRuntime]);
+    cy.style(style(values, coloringMode));
+  }, [cyRef.current, values, coloringMode]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

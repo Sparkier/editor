@@ -10,41 +10,53 @@ import './Controls.css';
 export function Controls() {
   const dispatch = useDispatch();
   const coloring: string = useAppSelector(selectedColoringSelector);
-  const values = useAppSelector(selectedValuesSelector);
+  const values: Values = useAppSelector(selectedValuesSelector);
 
   const toggle = (e) => dispatch(setDataflowColoring((e.target as HTMLInputElement).value));
 
-  return (
-    <div>
-      <form>
-        <p>Color dataflow graph by:</p>
-        <input type="radio" value="type" name="dataflow_color" onChange={toggle} checked={coloring === 'type'} />
-        Node Type
-        <input type="radio" value="time" name="dataflow_color" onChange={toggle} defaultChecked={coloring === 'time'} />
-        Time
-      </form>
-      {values !== null && (
-        <Slider
-          values={values}
-          onChange={({min, max}: {min: number; max: number}) => dispatch(setTimingRange({min, max}))}
-        />
-      )}
-    </div>
-  );
+  if (values) {
+    const time = Object.entries(values).map((v) => {
+      return v[1]['value'].time as number;
+    });
+    const max_value = Math.ceil(Math.max(...time) * 100) / 100;
+    const min_value = Math.floor(Math.min(...time) * 100) / 100;
+
+    return (
+      <div>
+        <form>
+          <p>Color dataflow graph by:</p>
+          <input type="radio" value="type" name="dataflow_color" onChange={toggle} checked={coloring === 'type'} />
+          Node Type
+          <input type="radio" value="time" name="dataflow_color" onChange={toggle} checked={coloring === 'time'} />
+          Time
+        </form>
+        {values !== null && (
+          <Slider
+            values={{min: min_value, max: max_value}}
+            onChange={({min, max}) => dispatch(setTimingRange({min, max}))}
+          />
+        )}
+      </div>
+    );
+  }
+  return null;
 }
 
 interface SliderProps {
-  values: Values;
+  values: {min: number; max: number};
   onChange: ({min, max}: {min: number; max: number}) => void;
 }
 const Slider: React.FC<SliderProps> = ({values, onChange}) => {
-  const time = Object.entries(values).map((v) => {
-    return v[1]['value'].time as number;
-  });
-  const max = Math.ceil(Math.max(...time) * 100) / 100;
-  const min = Math.floor(Math.min(...time) * 100) / 100;
+  const {min, max} = values;
+
   const [minVal, setMinVal] = React.useState(min);
   const [maxVal, setMaxVal] = React.useState(max);
+
+  React.useEffect(() => {
+    setMinVal(min);
+    setMaxVal(max);
+  }, [values.min, values.max]);
+
   const minValRef = React.useRef<HTMLInputElement>(null);
   const maxValRef = React.useRef<HTMLInputElement>(null);
   const range = React.useRef<HTMLDivElement>(null);
@@ -108,6 +120,9 @@ const Slider: React.FC<SliderProps> = ({values, onChange}) => {
         className="thumb thumb--zindex-4"
       />
       <div className="slider">
+        <div className="slider__min-value">{min}</div>
+        <div className="slider__max-value">{max}</div>
+
         <div className="slider__track" />
         <div ref={range} className="slider__range"></div>
         <div className="slider__left-value">{minVal}</div>

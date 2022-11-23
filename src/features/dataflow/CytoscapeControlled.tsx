@@ -8,7 +8,7 @@ import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
 import {Hover} from './hoverSlice';
-import {PulsesState, Values} from './pulsesSlice';
+import {Values} from './pulsesSlice';
 
 cytoscape.use(popper);
 

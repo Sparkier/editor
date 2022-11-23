@@ -12,13 +12,15 @@ export function Controls() {
   const coloring: string = useAppSelector(selectedColoringSelector);
   const values = useAppSelector(selectedValuesSelector);
 
+  const toggle = (e) => dispatch(setDataflowColoring((e.target as HTMLInputElement).value));
+
   return (
     <div>
-      <form onChange={(e) => dispatch(setDataflowColoring((e.target as HTMLInputElement).value))}>
+      <form>
         <p>Color dataflow graph by:</p>
-        <input type="radio" value="type" name="dataflow_color" checked={coloring === 'type'} />
+        <input type="radio" value="type" name="dataflow_color" onChange={toggle} checked={coloring === 'type'} />
         Node Type
-        <input type="radio" value="time" name="dataflow_color" checked={coloring === 'time'} />
+        <input type="radio" value="time" name="dataflow_color" onChange={toggle} defaultChecked={coloring === 'time'} />
         Time
       </form>
       {values !== null && (

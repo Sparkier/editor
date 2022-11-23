@@ -1,4 +1,4 @@
-import cytoscape, {CytoscapeOptions, Stylesheet} from 'cytoscape';
+import cytoscape, {CytoscapeOptions} from 'cytoscape';
 import * as React from 'react';
 import {Elements} from './utils/allRelated';
 import popper from 'cytoscape-popper';
@@ -8,7 +8,7 @@ import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
 import {Hover} from './hoverSlice';
-import {Values} from './pulsesSlice';
+import {PulsesState, Values} from './pulsesSlice';
 
 cytoscape.use(popper);
 
@@ -21,6 +21,11 @@ const OPTIONS = (values: Values | null): CytoscapeOptions => {
     maxZoom: 1e1,
   };
 };
+
+function getValues(allPulses, values) {
+  const firstPulse = allPulses.length ? allPulses[0] : null;
+  return firstPulse ? (values ? values : firstPulse.values) : null;
+}
 
 /**
  * A controlled Cytoscape component, which is meant to be rendered once with a given set of elements and list of visible
@@ -36,6 +41,7 @@ export function CytoscapeControlled({
   hoverByFlame,
   perfHover,
   values,
+  allPulses,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -45,20 +51,20 @@ export function CytoscapeControlled({
   onHover: (target: null | {type: 'node' | 'edge'; id: string; referenceClientRect: DOMRect}) => void;
   highlight: Highlight | null;
   hoverByFlame: Hover | null;
-  perfHover;
+  perfHover: (target: any) => {payload: Hover; type: string};
   values: Values;
+  allPulses: PulsesState;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
   const layoutRef = React.useRef<cytoscape.Layouts | null>(null);
   // The elements that have been removed, from a selection
   const removedRef = React.useRef<cytoscape.CollectionReturnValue | null>(null);
-
   const getRemovedNodeIDs = () => new Set(removedRef.current?.map((n) => n.id()) ?? []);
 
   // Set cytoscape ref in first effect and set up callbacks
   React.useEffect(() => {
-    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values)}));
+    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(getValues(allPulses, values))}));
     layoutRef.current = cy.makeLayout({name: 'preset'});
     removedRef.current = null;
     cy.on('select', (event) => {
@@ -229,13 +235,8 @@ export function CytoscapeControlled({
 
   React.useEffect(() => {
     const cy = cyRef.current;
-    cy.style(style(values));
-  }, [cyRef.current, values]);
-
-  React.useEffect(() => {
-    const cy = cyRef.current;
-    cy.style(style(values));
-  }, [cyRef.current, values]);
+    cy.style(style(getValues(allPulses, values)));
+  }, [cyRef.current, values, allPulses]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

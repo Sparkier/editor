@@ -17,6 +17,7 @@ export function Cytoscape() {
   const selected = useAppSelector(selectedElementsSelector);
   const highlight = useAppSelector(selectedHighlightSelector);
   const values = useAppSelector(selectedValuesSelector);
+  const allPulses = useAppSelector((state) => state.pulses);
 
   const onSelect = React.useCallback((el) => dispatch(setSelectedElements(el)), [dispatch]);
   const onHover = React.useCallback((target) => dispatch(setPopup(target)), [dispatch]);
@@ -35,6 +36,7 @@ export function Cytoscape() {
       hoverByFlame={hover}
       perfHover={perfHover}
       values={values}
+      allPulses={allPulses}
     />
   );
 }

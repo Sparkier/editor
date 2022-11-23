@@ -2,12 +2,14 @@ import * as React from 'react';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from '../../hooks';
 import {currentPositionsSelector} from './layoutSlice';
-import {selectedElementsSelector, setSelectedElements, selectedValuesSelector} from './selectionSlice';
+import {selectedElementsSelector, selectedValuesSelector, setSelectedElements} from './selectionSlice';
 import {setPopup} from './popupSlice';
 import {CytoscapeControlled} from './CytoscapeControlled';
 import {cytoscapeElementsSelector} from './runtimeSlice';
 import {selectedHighlightSelector} from './highlightSlice';
 import {hoverSelector, setHover} from './hoverSlice';
+import {selectedColoringSelector} from './colorSlice';
+import {selectedTimingRangeSelector} from './rangeSlice';
 
 export function Cytoscape() {
   const dispatch = useDispatch();
@@ -17,6 +19,8 @@ export function Cytoscape() {
   const selected = useAppSelector(selectedElementsSelector);
   const highlight = useAppSelector(selectedHighlightSelector);
   const values = useAppSelector(selectedValuesSelector);
+  const timeRange = useAppSelector(selectedTimingRangeSelector);
+  const coloringMode = useAppSelector(selectedColoringSelector);
 
   const onSelect = React.useCallback((el) => dispatch(setSelectedElements(el)), [dispatch]);
   const onHover = React.useCallback((target) => dispatch(setPopup(target)), [dispatch]);
@@ -35,6 +39,8 @@ export function Cytoscape() {
       hoverByFlame={hover}
       perfHover={perfHover}
       values={values}
+      coloringMode={coloringMode}
+      timeRange={timeRange}
     />
   );
 }

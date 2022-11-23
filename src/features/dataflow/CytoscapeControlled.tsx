@@ -1,4 +1,4 @@
-import cytoscape, {CytoscapeOptions, Stylesheet} from 'cytoscape';
+import cytoscape, {CytoscapeOptions} from 'cytoscape';
 import * as React from 'react';
 import {Elements} from './utils/allRelated';
 import popper from 'cytoscape-popper';
@@ -8,7 +8,7 @@ import './CytoscapeControlled.css';
 import {setsEqual} from './utils/setsEqual';
 import {Highlight} from './highlightSlice';
 import {Hover} from './hoverSlice';
-import {Values} from './pulsesSlice';
+import {PulsesState, Values} from './pulsesSlice';
 
 cytoscape.use(popper);
 
@@ -45,7 +45,7 @@ export function CytoscapeControlled({
   onHover: (target: null | {type: 'node' | 'edge'; id: string; referenceClientRect: DOMRect}) => void;
   highlight: Highlight | null;
   hoverByFlame: Hover | null;
-  perfHover;
+  perfHover: (target: any) => {payload: Hover; type: string};
   values: Values;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
@@ -53,7 +53,6 @@ export function CytoscapeControlled({
   const layoutRef = React.useRef<cytoscape.Layouts | null>(null);
   // The elements that have been removed, from a selection
   const removedRef = React.useRef<cytoscape.CollectionReturnValue | null>(null);
-
   const getRemovedNodeIDs = () => new Set(removedRef.current?.map((n) => n.id()) ?? []);
 
   // Set cytoscape ref in first effect and set up callbacks
@@ -226,11 +225,6 @@ export function CytoscapeControlled({
       });
     }
   }, [cyRef.current, hoverByFlame]);
-
-  React.useEffect(() => {
-    const cy = cyRef.current;
-    cy.style(style(values));
-  }, [cyRef.current, values]);
 
   React.useEffect(() => {
     const cy = cyRef.current;

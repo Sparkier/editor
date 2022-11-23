@@ -4,9 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {useAppSelector} from '../../hooks';
 import {selectedHighlightSelector, Highlight, setHighlight} from '../dataflow/highlightSlice';
 import {State} from '../../constants/default-state';
-import {selectedPulseSelector} from '../dataflow/selectionSlice';
-import {pulsesSelector} from '../dataflow/pulsesSlice';
-import {createSelector} from '@reduxjs/toolkit';
+import {selectedValuesSelector} from '../dataflow/selectionSlice';
 import {Popup} from '../../components/popup';
 import {None} from 'vega';
 import ErrorBoundary from '../../components/error-boundary';
@@ -15,18 +13,15 @@ import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
 let focusLevel = 0;
 
 export function Flame() {
-  const selectedValuesSelector = createSelector(pulsesSelector, selectedPulseSelector, (pulses, selected) =>
-    selected === null ? null : pulses.find((p) => p.clock === selected).values
-  );
   const selectedValues = useAppSelector(selectedValuesSelector);
-  const all_pulses = useAppSelector((state) => state.pulses);
+  const allPulses = useAppSelector((state) => state.pulses);
   const highlight: Highlight = useAppSelector(selectedHighlightSelector);
   const hover: Hover = useAppSelector(hoverSelector);
 
   const view = useSelector<State>((state) => state.view);
   const mapping = view['mapping'];
 
-  const pulse_1 = all_pulses.length ? all_pulses[0] : null;
+  const pulse_1 = allPulses.length ? allPulses[0] : null;
 
   // generate the data input for performance chart
   const dataInput = React.useMemo(() => {

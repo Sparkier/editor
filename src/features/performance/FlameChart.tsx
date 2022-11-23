@@ -12,6 +12,8 @@ import {None} from 'vega';
 import ErrorBoundary from '../../components/error-boundary';
 import {Hover, hoverSelector, setHover} from '../dataflow/hoverSlice';
 
+let focusLevel = 0;
+
 export function Flame() {
   const selectedValuesSelector = createSelector(pulsesSelector, selectedPulseSelector, (pulses, selected) =>
     selected === null ? null : pulses.find((p) => p.clock === selected).values
@@ -94,7 +96,6 @@ export function CreateFlameChart({
   const chartRef = React.useRef(null);
   const dispatch = useDispatch();
   const hoverRef = React.useRef(null);
-
   const svg = d3.select(chartRef.current);
   const width = 975;
   const height = 200;
@@ -158,67 +159,41 @@ export function CreateFlameChart({
     return result.replace(/"|\]/g, ''); // replace all " and ] characters
   };
 
-  let focus = data;
-
   const zoom = (p) => {
-    if (p.depth != 0) {
-      focus = focus === p ? (p = p.parent) : p;
+    focusLevel = p.depth;
 
-      data.each(
-        (d: any) =>
-          (d.target = {
-            x0: ((d.x0 - p.x0) / (p.x1 - p.x0)) * width,
-            x1: ((d.x1 - p.x0) / (p.x1 - p.x0)) * width,
-            y0: d.y0 - p.y0,
-            y1: d.y1 - p.y0,
-          })
-      );
+    data.each(
+      (d: any) =>
+        (d.target = {
+          x0: ((d.x0 - p.x0) / (p.x1 - p.x0)) * width,
+          x1: ((d.x1 - p.x0) / (p.x1 - p.x0)) * width,
+          y0: d.y0 - p.y0,
+          y1: d.y1 - p.y0,
+        })
+    );
 
-      const t = d3
-        .select(chartRef.current)
-        .selectAll('g')
-        .transition()
-        .duration(750)
-        .attr('transform', (d: any) => `translate(${d.target.x0},${d.target.y0})`);
-
-      svg
-        .selectAll('rect')
-        .transition(t)
-        .attr('width', (d: any) => rectWidth(d.target));
-      svg
-        .selectAll('text')
-        .transition(t)
-        .attr('fill-opacity', (d: any) => +labelVisible(d.target));
-      svg
-        .selectAll('tspan')
-        .transition(t)
-        .attr('fill-opacity', (d: any) => (labelVisible(d.target) as any) * 0.7);
-    }
-  };
-
-  const dblclick = () => {
-    focus = data;
-
-    // const t = cell
-    const t = svg
+    const transition = d3
+      .select(chartRef.current)
       .selectAll('g')
       .transition()
       .duration(750)
-      .attr('transform', (d: any) => `translate(${d.x0},${d.y0})`);
-
+      .attr('transform', (d: any) => `translate(${d.target.x0},${d.target.y0})`);
     svg
       .selectAll('rect')
-      .transition(t)
-      .attr('width', (d: any) => rectWidth(d));
+      .transition(transition)
+      .attr('width', (d: any) => rectWidth(d.target));
     svg
       .selectAll('text')
-      .transition(t)
-      .attr('fill-opacity', (d: any) => +labelVisible(d));
+      .transition(transition)
+      .attr('fill-opacity', (d: any) => +labelVisible(d.target));
     svg
       .selectAll('tspan')
-      .transition(t)
-      .attr('fill-opacity', (d: any) => (labelVisible(d) as any) * 0.7);
+      .transition(transition)
+      .attr('fill-opacity', (d: any) => (labelVisible(d.target) as any) * 0.7);
+  };
 
+  const zoomOut = () => {
+    zoom(data);
     dispatch(setHighlight(null));
   };
 
@@ -227,7 +202,6 @@ export function CreateFlameChart({
       const color = d3.scaleOrdinal(d3.quantize(d3.scaleSequential(['grey', '#007bff']), parents.length + 1));
 
       const clicked = (event, p) => {
-        zoom(p);
         dispatch(setHighlight(hoverRef.current));
       };
 
@@ -295,7 +269,7 @@ export function CreateFlameChart({
         dispatch(setHover(null));
       });
 
-      svg.on('dblclick', dblclick);
+      svg.on('dblclick', zoomOut);
 
       const text = cell
         .append('text')
@@ -358,13 +332,19 @@ export function CreateFlameChart({
         .attr('fill-opacity', (d: any) => {
           if (!d.depth) return 0.1;
           // zoom in
-          if (highlight.target == d.data.id) zoom(d);
+          if (highlight.target == d.data.id) {
+            console.log(focusLevel);
+            console.log(d.depth);
+            if (focusLevel === d.depth) {
+              zoom(d.parent);
+            } else {
+              zoom(d);
+            }
+          }
           return values.includes(d.data.id) || values.includes(d.data.parent) ? 0.8 : 0.1;
         });
     } else {
       d3.select(chartRef.current).selectAll('rect').attr('fill-opacity', 0.6);
-      dispatch(setHighlight(null));
-      dblclick();
     }
   }, [chartRef.current, highlight]);
 
@@ -402,14 +382,14 @@ const tree = (data) => {
   // construct a nested tree from the data array
   const nestData = [];
 
-  data.forEach((el) => {
-    if ('parent' in el) {
-      if (!data[dataMap[el.parent]].children) {
-        data[dataMap[el.parent]].children = [];
+  data.forEach((dataPoint) => {
+    if ('parent' in dataPoint) {
+      if (!data[dataMap[dataPoint.parent]].children) {
+        data[dataMap[dataPoint.parent]].children = [];
       }
-      data[dataMap[el.parent]].children.push(el);
+      data[dataMap[dataPoint.parent]].children.push(dataPoint);
     } else {
-      nestData.push(el);
+      nestData.push(dataPoint);
     }
   });
   return nestData;

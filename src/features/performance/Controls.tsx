@@ -46,6 +46,7 @@ interface SliderProps {
   values: {min: number; max: number};
   onChange: ({min, max}: {min: number; max: number}) => void;
 }
+
 const Slider: React.FC<SliderProps> = ({values, onChange}) => {
   const {min, max} = values;
 

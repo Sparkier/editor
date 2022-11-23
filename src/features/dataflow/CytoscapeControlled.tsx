@@ -22,11 +22,6 @@ const OPTIONS = (values: Values | null): CytoscapeOptions => {
   };
 };
 
-function getValues(allPulses, values) {
-  const firstPulse = allPulses.length ? allPulses[0] : null;
-  return firstPulse ? (values ? values : firstPulse.values) : null;
-}
-
 /**
  * A controlled Cytoscape component, which is meant to be rendered once with a given set of elements and list of visible
  * nodes, and then re-rendered updating the positions and which elements are visible, before being re-rendered with new elements.
@@ -41,7 +36,6 @@ export function CytoscapeControlled({
   hoverByFlame,
   perfHover,
   values,
-  allPulses,
 }: {
   elements: cytoscape.ElementsDefinition | null;
   // Mapping of each visible node to its position, the IDs being a subset of the `elements` props
@@ -53,7 +47,6 @@ export function CytoscapeControlled({
   hoverByFlame: Hover | null;
   perfHover: (target: any) => {payload: Hover; type: string};
   values: Values;
-  allPulses: PulsesState;
 }) {
   const divRef = React.useRef<HTMLDivElement | null>(null);
   const cyRef = React.useRef<cytoscape.Core | null>(null);
@@ -64,7 +57,7 @@ export function CytoscapeControlled({
 
   // Set cytoscape ref in first effect and set up callbacks
   React.useEffect(() => {
-    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(getValues(allPulses, values))}));
+    const cy = (cyRef.current = cytoscape({container: divRef.current, ...OPTIONS(values)}));
     layoutRef.current = cy.makeLayout({name: 'preset'});
     removedRef.current = null;
     cy.on('select', (event) => {
@@ -235,8 +228,8 @@ export function CytoscapeControlled({
 
   React.useEffect(() => {
     const cy = cyRef.current;
-    cy.style(style(getValues(allPulses, values)));
-  }, [cyRef.current, values, allPulses]);
+    cy.style(style(values));
+  }, [cyRef.current, values]);
 
   return <div className="cytoscape" ref={divRef} />;
 }

@@ -1,6 +1,7 @@
 import {Values} from './../pulsesSlice';
 import {scheme} from 'vega-scale';
 import {colorKeys} from './graph';
+import * as d3 from 'd3';
 
 // Use these color schemes for the nodes
 // https://vega.github.io/vega/docs/schemes/#categorical
@@ -29,11 +30,13 @@ export const style = (
           }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
         };
       }
+      const scale = d3.scaleSqrt([timeRange.min, timeRange.max], ['white', 'red']);
+
       return {
         selector: `node[id="${key[0]}"]`,
         style: {
-          'background-color': 'red',
-          'background-opacity': 0.05 + ((key[1]['value'].time - timeRange.min) / (timeRange.max - timeRange.min)) * 0.7,
+          'background-color': scale(currentTime),
+          'background-opacity': 1,
         }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
       };
     });

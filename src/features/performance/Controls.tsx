@@ -31,10 +31,13 @@ export function Controls() {
           Time
         </form>
         {values !== null && (
-          <Slider
-            values={{min: min_value, max: max_value}}
-            onChange={({min, max}) => dispatch(setTimingRange({min, max}))}
-          />
+          <div className="control-container">
+            <p>Filter dataflow graph timings:</p>
+            <Slider
+              values={{min: min_value, max: max_value}}
+              onChange={({min, max}) => dispatch(setTimingRange({min, max}))}
+            />
+          </div>
         )}
       </div>
     );

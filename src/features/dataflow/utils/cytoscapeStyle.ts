@@ -36,7 +36,6 @@ export const style = (
         selector: `node[id="${key[0]}"]`,
         style: {
           'background-color': scale(currentTime),
-          // 'background-opacity': 1,
         }, // Color opacity scale based on key[1].value.time. range: [0.05, 0.75]
       };
     });

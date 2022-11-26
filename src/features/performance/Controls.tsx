@@ -22,9 +22,9 @@ export function Controls() {
     const min_value = Math.floor(Math.min(...time) * 100) / 100;
 
     return (
-      <div>
-        <form>
-          <p>Color dataflow graph by:</p>
+      <div className="controls-container">
+        <form className="control-container">
+          <p>Color graph by:</p>
           <input type="radio" value="type" name="dataflow_color" onChange={toggle} checked={coloring === 'type'} />
           Node Type
           <input type="radio" value="time" name="dataflow_color" onChange={toggle} checked={coloring === 'time'} />
@@ -32,7 +32,7 @@ export function Controls() {
         </form>
         {values !== null && (
           <div className="control-container">
-            <p>Filter dataflow graph timings:</p>
+            <p>Filter graph timings:</p>
             <Slider
               values={{min: min_value, max: max_value}}
               onChange={({min, max}) => dispatch(setTimingRange({min, max}))}

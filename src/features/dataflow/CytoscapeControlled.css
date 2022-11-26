@@ -1,6 +1,7 @@
 .cytoscape {
   width: 100%;
   min-width: 0px;
+  min-height: 0px;
   height: 100%;
   background: var(--white-color);
   position: relative;

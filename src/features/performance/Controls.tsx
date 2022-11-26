@@ -12,8 +12,8 @@ export function Controls() {
   const coloring: string = useAppSelector(selectedColoringSelector);
   const values: Values = useAppSelector(selectedValuesSelector);
 
-  const toggle = (e) => dispatch(setDataflowColoring((e.target as HTMLInputElement).value));
-
+  const toggle = (eventSource: React.ChangeEvent) =>
+    dispatch(setDataflowColoring((eventSource.target as HTMLInputElement).value));
   if (values) {
     const time = Object.entries(values).map((v) => {
       return v[1]['value'].time as number;
@@ -30,7 +30,7 @@ export function Controls() {
           <input type="radio" value="time" name="dataflow_color" onChange={toggle} checked={coloring === 'time'} />
           Time
         </form>
-        {values !== null && (
+        {values !== null && coloring === 'time' && (
           <div className="control-container">
             <p>Filter graph timings:</p>
             <Slider
@@ -91,7 +91,7 @@ const Slider: React.FC<SliderProps> = ({values, onChange}) => {
 
   React.useEffect(() => {
     onChange({min: minVal, max: maxVal});
-  }, [minVal, maxVal, onChange]);
+  }, [minVal, maxVal]);
 
   return (
     <div className="container">

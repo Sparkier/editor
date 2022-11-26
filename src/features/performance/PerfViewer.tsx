@@ -33,11 +33,11 @@ export class PerfViewer extends React.Component<
     return (
       <div className="perf-pane">
         <div className="sidebar">
-          <Controls />
           <Pulses />
         </div>
         <div className="perf-chart">
           <FlameChart />
+          <Controls />
           <Graph />
         </div>
       </div>

@@ -1,5 +1,13 @@
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--white-color);
+  border-top: solid 2px var(--light-gray-color);
+}
+
 .control-container {
-  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .container {

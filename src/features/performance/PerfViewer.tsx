@@ -60,5 +60,5 @@ export function Graph() {
 export function FlameChart() {
   const flame_chart = React.useMemo(() => <Flame />, []);
 
-  return <div>{flame_chart}</div>;
+  return <div className="flame-chart">{flame_chart}</div>;
 }

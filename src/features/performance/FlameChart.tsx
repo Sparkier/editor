@@ -213,10 +213,6 @@ export function CreateFlameChart({
       };
 
       const onHover = (d, i) => {
-        rect.attr('stroke', (x) => {
-          return x == i ? 'red' : None;
-        });
-
         const target: Highlight = {paths: [i.data.id], ids: []};
         const queue = [i];
         target.target = i.children ? i.data.id : i.data.parent;
@@ -329,8 +325,6 @@ export function CreateFlameChart({
           if (!d.depth) return 0.1;
           // zoom in
           if (highlight.target == d.data.id) {
-            console.log(focusLevel);
-            console.log(d.depth);
             if (focusLevel === d.depth) {
               zoom(d.parent);
             } else {

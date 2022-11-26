@@ -190,13 +190,11 @@ class Editor extends React.PureComponent<Props, State> {
       debug.vegaLiteSpec = debug.normalizedVegaLiteSpec = undefined;
     }
     setRuntime(runtime);
-    console.log(runtime);
     setView(view);
   }
 
   private runAfter(df: any) {
     const clock = df._clock;
-    console.log(df.mapping);
     const perf_summary: Record<string, number> = {};
 
     // Mapping from ID to value
@@ -237,7 +235,6 @@ class Editor extends React.PureComponent<Props, State> {
       });
     }
     runtime = Object.values<number>(perf_summary).reduce((acc: number, val: number) => acc + val, 0);
-    console.log(perf_summary);
 
     this.props.recordPulse(clock, values, Math.round((runtime + Number.EPSILON) * 100) / 100);
 
@@ -264,9 +261,7 @@ class Editor extends React.PureComponent<Props, State> {
 
     view.renderer(renderer).initialize(chart);
 
-    const start = performance.now();
     await view.runAsync();
-    console.log(performance.now() - start, 'total runtime');
 
     if (tooltipEnable) {
       // Tooltip needs to be added after initializing the view with `chart`

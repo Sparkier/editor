@@ -5,11 +5,13 @@ import {currentPositionsSelector} from './layoutSlice';
 import {selectedElementsSelector, selectedValuesSelector, setSelectedElements} from './selectionSlice';
 import {setPopup} from './popupSlice';
 import {CytoscapeControlled} from './CytoscapeControlled';
+import {NodesList} from './NodesList';
 import {cytoscapeElementsSelector} from './runtimeSlice';
 import {selectedHighlightSelector} from './highlightSlice';
 import {hoverSelector, setHover} from './hoverSlice';
 import {selectedColoringSelector} from './colorSlice';
 import {selectedTimingRangeSelector} from './rangeSlice';
+import './Cytoscape.css';
 
 export function Cytoscape() {
   const dispatch = useDispatch();
@@ -29,18 +31,21 @@ export function Cytoscape() {
   const perfHover = React.useCallback((target) => dispatch(setHover(target)), [dispatch]);
 
   return (
-    <CytoscapeControlled
-      elements={elements}
-      positions={positions}
-      selected={selected}
-      onSelect={onSelect}
-      onHover={onHover}
-      highlight={highlight}
-      hoverByFlame={hover}
-      perfHover={perfHover}
-      values={values}
-      coloringMode={coloringMode}
-      timeRange={timeRange}
-    />
+    <div className="graph-container">
+      {values && <NodesList values={values} nodes={elements.nodes} />}
+      <CytoscapeControlled
+        elements={elements}
+        positions={positions}
+        selected={selected}
+        onSelect={onSelect}
+        onHover={onHover}
+        highlight={highlight}
+        hoverByFlame={hover}
+        perfHover={perfHover}
+        values={values}
+        coloringMode={coloringMode}
+        timeRange={timeRange}
+      />
+    </div>
   );
 }

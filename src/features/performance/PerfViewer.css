@@ -13,7 +13,7 @@
   min-width: 0px;
   flex-grow: 1;
   display: flex;
-  padding: 2px;
+  padding-left: 2px;
   padding-top: 0;
   background: var(--light-gray-color);
   display: flex;
@@ -23,5 +23,10 @@
 .chart {
   flex: auto;
   width: 100%;
+  min-height: 0px;
   position: relative;
+}
+
+.flame-chart {
+  padding-bottom: 2px;
 }

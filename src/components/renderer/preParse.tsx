@@ -1,4 +1,3 @@
-import {prepareCopy} from 'immer/dist/internal';
 import * as vega from 'vega';
 
 export default function preParse(spec: vega.Spec, prefix = '') {
@@ -13,6 +12,5 @@ export default function preParse(spec: vega.Spec, prefix = '') {
       }
     }
   }
-  console.log(spec);
   return spec;
 }

@@ -5,7 +5,6 @@ import {Flame} from './FlameChart';
 import {useRecomputeLayout} from '../dataflow/layoutSlice';
 import {Cytoscape} from '../dataflow/Cytoscape';
 import {Popup} from '../dataflow/Popup';
-import {Controls} from './Controls';
 
 /**
  * Wrap the component so we can catch the errors. We don't use the previously defined
@@ -37,7 +36,6 @@ export class PerfViewer extends React.Component<
         </div>
         <div className="perf-chart">
           <FlameChart />
-          <Controls />
           <Graph />
         </div>
       </div>

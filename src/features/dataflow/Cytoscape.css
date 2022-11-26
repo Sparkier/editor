@@ -1,5 +1,13 @@
+.dataflow-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
 .graph-container {
   display: flex;
-  width: 100%;
+  min-width: 0px;
+  flex-grow: 1;
+  flex-direction: column;
   height: 100%;
 }

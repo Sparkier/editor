@@ -11,6 +11,7 @@ import {selectedHighlightSelector} from './highlightSlice';
 import {hoverSelector, setHover} from './hoverSlice';
 import {selectedColoringSelector} from './colorSlice';
 import {selectedTimingRangeSelector} from './rangeSlice';
+import {Controls} from '../performance/Controls';
 import './Cytoscape.css';
 
 export function Cytoscape() {
@@ -31,21 +32,24 @@ export function Cytoscape() {
   const perfHover = React.useCallback((target) => dispatch(setHover(target)), [dispatch]);
 
   return (
-    <div className="graph-container">
+    <div className="dataflow-container">
       {values && <NodesList values={values} nodes={elements.nodes} />}
-      <CytoscapeControlled
-        elements={elements}
-        positions={positions}
-        selected={selected}
-        onSelect={onSelect}
-        onHover={onHover}
-        highlight={highlight}
-        hoverByFlame={hover}
-        perfHover={perfHover}
-        values={values}
-        coloringMode={coloringMode}
-        timeRange={timeRange}
-      />
+      <div className="graph-container">
+        <Controls />
+        <CytoscapeControlled
+          elements={elements}
+          positions={positions}
+          selected={selected}
+          onSelect={onSelect}
+          onHover={onHover}
+          highlight={highlight}
+          hoverByFlame={hover}
+          perfHover={perfHover}
+          values={values}
+          coloringMode={coloringMode}
+          timeRange={timeRange}
+        />
+      </div>
     </div>
   );
 }

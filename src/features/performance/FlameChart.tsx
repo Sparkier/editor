@@ -198,7 +198,8 @@ export function CreateFlameChart({
       const color = d3.scaleOrdinal(d3.quantize(d3.scaleSequential(['#EBF4FA', '#007bff']), parents.length + 1));
 
       const clicked = (event, p) => {
-        dispatch(setHighlight(hoverRef.current));
+        zoom(p);
+        dispatch(setHighlight({...hoverRef.current, source: 'flame'}));
       };
 
       const deriveId = (d: any) => {
@@ -324,13 +325,7 @@ export function CreateFlameChart({
         .attr('fill-opacity', (d: any) => {
           if (!d.depth) return 0.1;
           // zoom in
-          if (highlight.target == d.data.id) {
-            if (focusLevel === d.depth) {
-              zoom(d.parent);
-            } else {
-              zoom(d);
-            }
-          }
+          if (highlight.target == d.data.id && highlight.source != 'flame') zoom(d);
           return values.includes(d.data.id) || values.includes(d.data.parent) ? 0.8 : 0.1;
         });
     } else {

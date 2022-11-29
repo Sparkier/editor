@@ -118,3 +118,22 @@ function Pulse({
     </tr>
   );
 }
+
+export function TotalRuntime() {
+  const pulses = useAppSelector(sortedPulsesSelector);
+  const selectedPulse = useAppSelector(selectedPulseSelector);
+  const [runtime, setRuntime] = React.useState(0);
+
+  React.useEffect(() => {
+    if (pulses !== undefined && pulses.length > 0) {
+      setRuntime(selectedPulse ? pulses[selectedPulse].runtime : pulses[pulses.length - 1].runtime);
+    }
+  }, [pulses, selectedPulse]);
+
+  return (
+    <div>
+      <p>Total Runtime</p>
+      <p className="total-runtime">{runtime} ms</p>
+    </div>
+  );
+}

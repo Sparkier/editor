@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Pulses} from '../dataflow/Sidebar';
+import {Pulses, TotalRuntime} from '../dataflow/Sidebar';
 import './PerfViewer.css';
 import {Flame} from './FlameChart';
 import {useRecomputeLayout} from '../dataflow/layoutSlice';
@@ -32,6 +32,7 @@ export class PerfViewer extends React.Component<
     return (
       <div className="perf-pane">
         <div className="sidebar">
+          <TotalRuntime />
           <Pulses />
         </div>
         <div className="perf-chart">

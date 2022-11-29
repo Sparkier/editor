@@ -49,13 +49,18 @@ class Editor extends React.PureComponent<Props> {
   }
 
   public mouseDownHandler() {
-    this.props.setHighlight(this.props.hover);
-    const range = this.props.highlight?.selected;
-    if (range) {
-      this.prevSelectedDecoratorID = this.decorateRange(this.prevSelectedDecoratorID, range, 'selectedLines');
+    if (this.props.highlight != this.props.hover) {
+      this.props.setHighlight(this.props.hover);
+      const range = this.props.highlight?.selected;
+      if (range) {
+        this.prevSelectedDecoratorID = this.decorateRange(this.prevSelectedDecoratorID, range, 'selectedLines');
+      } else {
+        this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
+        this.props.setHighlight(null);
+      }
     } else {
-      this.editor.deltaDecorations(this.prevSelectedDecoratorID, []);
       this.props.setHighlight(null);
+      this.props.setHover(null);
     }
   }
 

@@ -161,7 +161,7 @@ class Editor extends React.PureComponent<Props> {
     });
 
     editor.onMouseDown(this.mouseDownHandler);
-    editor.onMouseMove(() => this.hoverHandler(null));
+    editor.onMouseLeave(() => this.hoverHandler(null));
 
     editor.addAction({
       contextMenuGroupId: 'vega',

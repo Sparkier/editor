@@ -5,7 +5,6 @@ import {currentPositionsSelector} from './layoutSlice';
 import {selectedElementsSelector, selectedValuesSelector, setSelectedElements} from './selectionSlice';
 import {setPopup} from './popupSlice';
 import {CytoscapeControlled} from './CytoscapeControlled';
-import {NodesList} from './NodesList';
 import {cytoscapeElementsSelector} from './runtimeSlice';
 import {selectedHighlightSelector} from './highlightSlice';
 import {hoverSelector, setHover} from './hoverSlice';
@@ -33,7 +32,6 @@ export function Cytoscape() {
 
   return (
     <div className="dataflow-container">
-      {values && <NodesList values={values} nodes={elements.nodes} />}
       <div className="graph-container">
         <Controls />
         <CytoscapeControlled

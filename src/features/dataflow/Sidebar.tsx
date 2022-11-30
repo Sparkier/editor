@@ -44,7 +44,7 @@ function Type({type, label, selected}: {type: GraphType; label: string; selected
 
 export function Pulses() {
   return (
-    <fieldset>
+    <fieldset className="pulse-list-fields">
       <legend>Filter by pulse</legend>
       <div className="pulses-container">
         <p>
@@ -126,13 +126,17 @@ export function TotalRuntime() {
 
   React.useEffect(() => {
     if (pulses !== undefined && pulses.length > 0) {
-      setRuntime(selectedPulse ? pulses[selectedPulse].runtime : pulses[pulses.length - 1].runtime);
+      setRuntime(
+        selectedPulse
+          ? pulses.find((pulse) => pulse.clock === selectedPulse).runtime
+          : pulses[pulses.length - 1].runtime
+      );
     }
   }, [pulses, selectedPulse]);
 
   return (
     <div>
-      <p>Total Runtime</p>
+      <p>Total runtime</p>
       <p className="total-runtime">{runtime} ms</p>
     </div>
   );

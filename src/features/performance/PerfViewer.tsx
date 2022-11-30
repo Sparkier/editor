@@ -5,6 +5,7 @@ import {Flame} from './FlameChart';
 import {useRecomputeLayout} from '../dataflow/layoutSlice';
 import {Cytoscape} from '../dataflow/Cytoscape';
 import {Popup} from '../dataflow/Popup';
+import {NodesList} from '../dataflow/NodesList';
 
 /**
  * Wrap the component so we can catch the errors. We don't use the previously defined
@@ -34,6 +35,7 @@ export class PerfViewer extends React.Component<
         <div className="sidebar">
           <TotalRuntime />
           <Pulses />
+          <NodesList />
         </div>
         <div className="perf-chart">
           <FlameChart />
@@ -47,10 +49,10 @@ export class PerfViewer extends React.Component<
 export function Graph() {
   // Trigger starting the async layout computation, when this node is rendered
   useRecomputeLayout();
-  const cytoscape = React.useMemo(() => <Cytoscape />, []);
+  const cytosc = React.useMemo(() => <Cytoscape />, []);
   return (
     <div className="chart">
-      {cytoscape}
+      {cytosc}
       <Popup />
     </div>
   );

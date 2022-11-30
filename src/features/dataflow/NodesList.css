@@ -1,33 +1,13 @@
-.list-container {
-  height: 100%;
-  flex-shrink: 0;
-}
-
-.list-container table {
-  height: 100%;
-  display: block;
-  overflow-y: scroll;
-}
-
-.list-container table thead {
-  position: sticky;
-  top: 0;
-}
-
-/* By default the table editor has clickable headers. Revert those to default. */
-.list-container table.editor-table th {
-  cursor: default;
-}
-
-/* Make rows clickable instead */
-.list-container table.editor-table tr {
-  cursor: pointer;
-}
-
 .hovered-node {
   outline: 1px solid #0066cc;
 }
 
-.highlighted-node {
-  background-color: #0066cc60 !important;
+.node-list-fields {
+  max-height: 50%;
+}
+
+.list-container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
 }

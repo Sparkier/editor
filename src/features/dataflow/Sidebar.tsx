@@ -44,7 +44,7 @@ function Type({type, label, selected}: {type: GraphType; label: string; selected
 
 export function Pulses() {
   return (
-    <fieldset>
+    <fieldset className="pulse-list-fields">
       <legend>Filter by pulse</legend>
       <div className="pulses-container">
         <p>
